@@ -1,53 +1,77 @@
 #include "Mazzo.h"
 #include <iostream>
-#include <algorithm> // Necessario per mescolare il mazzo
-#include <random>    // Necessario per la casualità
-#include <chrono>    // Necessario per avere un seed casuale legato al tempo
+#include <algorithm> 
+#include <random>    
+#include <chrono>    
 
-// Il costruttore chiama subito la funzione per creare le carte
 Mazzo::Mazzo() {
     inizializzaMazzo();
 }
 
+// Struttura di supporto temporanea solo per la generazione
+struct MezzaCarta {
+    Colore c;
+    Valore v;
+};
+
 void Mazzo::inizializzaMazzo() {
-    // Svuotiamo le pile nel caso stessimo resettando la partita
     carteDaPescare.clear();
     carteScartate.clear();
 
-    // Creiamo due array di supporto per abbinare i colori Chiari e Oscuri
+    // Creiamo due liste temporanee per i lati separati
+    std::vector<MezzaCarta> latiChiari;
+    std::vector<MezzaCarta> latiOscuri;
+
     Colore coloriChiari[] = {ROSSO, GIALLO, VERDE, BLU};
     Colore coloriOscuri[] = {ARANCIONE, VIOLA, VERDE_ACQUA, ROSA};
 
-    // 1. GENERAZIONE CARTE COLORATE
+    // GENERIAMO I DUE LATI SEPARATAMENTE
     for (int c = 0; c < 4; c++) {
-        Colore cChiaro = coloriChiari[c];
-        Colore cOscuro = coloriOscuri[c];
-
-        // Numeri da 1 a 9 (in UNO Flip ci sono due copie per ogni numero)
+        // Numeri
         for (int v = UNO; v <= NOVE; v++) {
-            // Inseriamo due copie esatte
-            carteDaPescare.push_back(Carta(cChiaro, static_cast<Valore>(v), cOscuro, static_cast<Valore>(v)));
-            carteDaPescare.push_back(Carta(cChiaro, static_cast<Valore>(v), cOscuro, static_cast<Valore>(v)));
+            latiChiari.push_back({coloriChiari[c], static_cast<Valore>(v)});
+            latiChiari.push_back({coloriChiari[c], static_cast<Valore>(v)});
+            
+            latiOscuri.push_back({coloriOscuri[c], static_cast<Valore>(v)});
+            latiOscuri.push_back({coloriOscuri[c], static_cast<Valore>(v)});
         }
-
-        // Carte speciali colorate (2 copie ciascuna)
+        // Carte speciali colorate
         for (int i = 0; i < 2; i++) {
-            carteDaPescare.push_back(Carta(cChiaro, PESCA_UNO, cOscuro, PESCA_CINQUE));
-            carteDaPescare.push_back(Carta(cChiaro, INVERTI, cOscuro, INVERTI));
-            carteDaPescare.push_back(Carta(cChiaro, SALTA, cOscuro, SALTA_TUTTI));
-            carteDaPescare.push_back(Carta(cChiaro, FLIP, cOscuro, FLIP));
+            latiChiari.push_back({coloriChiari[c], PESCA_UNO});
+            latiChiari.push_back({coloriChiari[c], INVERTI});
+            latiChiari.push_back({coloriChiari[c], SALTA});
+            latiChiari.push_back({coloriChiari[c], FLIP});
+
+            latiOscuri.push_back({coloriOscuri[c], PESCA_CINQUE});
+            latiOscuri.push_back({coloriOscuri[c], INVERTI});
+            latiOscuri.push_back({coloriOscuri[c], SALTA_TUTTI});
+            latiOscuri.push_back({coloriOscuri[c], FLIP});
         }
     }
 
-    // 2. GENERAZIONE CARTE JOLLY (4 copie per tipo, senza colore base)
+    // Jolly (4 per tipo)
     for (int i = 0; i < 4; i++) {
-        carteDaPescare.push_back(Carta(NERO, JOLLY, NERO, JOLLY));
-        carteDaPescare.push_back(Carta(NERO, JOLLY_PESCA_DUE, NERO, JOLLY_PESCA_COLORE));
+        latiChiari.push_back({NERO, JOLLY});
+        latiChiari.push_back({NERO, JOLLY_PESCA_DUE});
+
+        latiOscuri.push_back({NERO, JOLLY});
+        latiOscuri.push_back({NERO, JOLLY_PESCA_COLORE});
+    }
+
+    // MESCOLIAMO SOLO I LATI OSCURI per creare abbinamenti casuali e imprevedibili!
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(latiOscuri.begin(), latiOscuri.end(), std::default_random_engine(seed));
+
+    // INCOLLIAMO LE DUE METÀ per creare le carte definitive
+    for (int i = 0; i < latiChiari.size(); i++) {
+        carteDaPescare.push_back(Carta(
+            latiChiari[i].c, latiChiari[i].v, 
+            latiOscuri[i].c, latiOscuri[i].v
+        ));
     }
 }
 
 void Mazzo::mescola() {
-    // Generiamo un "seme" basato sull'orologio del computer per avere mescolamenti sempre diversi
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::shuffle(carteDaPescare.begin(), carteDaPescare.end(), std::default_random_engine(seed));
 }
@@ -57,9 +81,7 @@ int Mazzo::carteRimanenti() {
 }
 
 Carta Mazzo::pesca() {
-    // Prende l'ultima carta in cima alla pila
     Carta pescata = carteDaPescare.back(); 
-    // La rimuove fisicamente dal mazzo
     carteDaPescare.pop_back();             
     return pescata;
 }
