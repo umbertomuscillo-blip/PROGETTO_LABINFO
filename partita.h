@@ -9,30 +9,21 @@ class Partita {
 private:
     std::vector<Giocatore> giocatori;
     Mazzo mazzo;
-    
-    // Variabili di stato del gioco
-    int turnoCorrente;         // Indice di chi deve giocare
-    bool sensoOrario;          // true = orario, false = antiorario
-    bool latoOscuroAttivo;     // true = oscuro, false = chiaro
-    
-    // La carta scoperta sul tavolo e il colore da seguire
+    int turnoCorrente;
+    bool sensoOrario;
+    bool latoOscuroAttivo;
     Carta cartaInCima;
     Colore coloreAttivo;
 
 public:
-    // Costruttore: gli passiamo i nomi dei giocatori
-    Partita(std::vector<std::string> nomiGiocatori);
+    // Ora passiamo direttamente gli oggetti Giocatore, così sappiamo chi è il Bot!
+    Partita(std::vector<Giocatore> listaGiocatori);
 
-    // Metodi per il flusso del gioco
     void setupIniziale();
     void eseguiTurno();
     bool partitaTerminata();
-    
-    // Metodi di controllo regole
     bool mossaValida(Carta c);
     void applicaEffetto(Carta c);
-    
-    // Utilità
     void passaAlProssimoGiocatore();
     void stampaStatoPartita();
 };

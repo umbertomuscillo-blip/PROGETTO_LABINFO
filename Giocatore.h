@@ -8,22 +8,20 @@
 class Giocatore {
 private:
     std::string nome;
-    std::vector<Carta> mano; // La lista dinamica delle carte che ha in mano
+    std::vector<Carta> mano;
+    bool isBot; // Flag per riconoscere l'IA
 
 public:
-    // Costruttore
-    Giocatore(std::string nomeGiocatore);
+    Giocatore(std::string nomeGiocatore, bool bot = false);
 
-    // Metodi base
     std::string getNome();
     int getNumeroCarte();
     bool haFinitoLeCarte();
+    bool getIsBot();
+    std::vector<Carta> getMano(); // Serve a far "leggere" la mano al Bot
 
-    // Metodi per interagire con le carte
     void pescaCarta(Carta c);
     Carta giocaCarta(int indice);
-    
-    // Metodo per vedere le carte (deve sapere se il mazzo è girato sul lato oscuro!)
     void mostraMano(bool latoOscuroAttivo);
 };
 
