@@ -1,5 +1,8 @@
+#include <iostream>
+
+using namespace std;
+
 int main() {
-    printf("Hello, capocchia World!\n");
-    printf("Hello, capocchia World a casa!\n");
+    cout << "Benvenuti a UNO Flip del team da 30 e lode!" << endl;
     return 0;
 }
