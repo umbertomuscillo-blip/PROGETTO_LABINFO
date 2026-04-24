@@ -49,3 +49,23 @@ graph TD
 4. [Da fare] Integrazione DBMS
 
 5. [Da fare] Rete Client-Server e GUI
+
+
+
+
+
+✅ FASE 1 COMPLETATA: Il Motore di Gioco Centrale (Core Engine)
+
+Abbiamo un gioco solido, testato e funzionante nel terminale.
+
+Carta & Mazzo: Generazione dinamica di 112 carte con lati chiari e oscuri mescolati in modo asincrono (niente abbinamenti scontati).
+
+Giocatori: Gestione dinamica della mano di carte (pesca, scarta, visualizzazione adattiva lato chiaro/oscuro).
+
+Partita & Turni: Flusso circolare perfetto, gestione dell'inversione di marcia e controllo di chiusura (vittoria).
+
+Regole & Validazione: Impossibile barare. Il gioco riconosce colori e numeri.
+
+Effetti Speciali: Il mazzo "Flippa", i Jolly fanno scegliere il colore (con comunicazione a schermo al prossimo giocatore), e le penalità (Pesca 1, Pesca 5, Pesca Colore, Salta) vengono inflitte correttamente all'avversario.
+
+Eccezioni Ufficiali: Inverti che vale come Salta per 2 giocatori.
