@@ -49,9 +49,72 @@ void Partita::stampaStatoPartita() {
     giocatori[turnoCorrente].mostraMano(latoOscuroAttivo);
 }
 
-// STUBS: Funzioni per ora "vuote" per evitare errori. Le riempiremo man mano!
-void Partita::eseguiTurno() {}
+// --- INIZIO NUOVE FUNZIONI PARTITA.CPP ---
+
+bool Partita::mossaValida(Carta c) {
+    Colore coloreCarta = c.getColore(latoOscuroAttivo);
+    Valore valoreCarta = c.getValore(latoOscuroAttivo);
+
+    // Se è una carta nera (Jolly), si può sempre giocare!
+    if (coloreCarta == NERO) return true;
+
+    // La mossa è valida se combacia il colore OPPURE il valore
+    if (coloreCarta == coloreAttivo || valoreCarta == cartaInCima.getValore(latoOscuroAttivo)) {
+        return true;
+    }
+
+    return false; // Se non combacia niente, mossa illegale
+}
+
+void Partita::passaAlProssimoGiocatore() {
+    // La funzione "%" (modulo) serve a far "ricominciare il giro" quando si arriva all'ultimo giocatore
+    if (sensoOrario) {
+        turnoCorrente = (turnoCorrente + 1) % giocatori.size();
+    } else {
+        turnoCorrente = (turnoCorrente - 1 + giocatori.size()) % giocatori.size();
+    }
+}
+
+void Partita::eseguiTurno() {
+    stampaStatoPartita();
+    
+    // Usiamo una "reference" (&) per lavorare direttamente sul giocatore di turno
+    Giocatore& giocatoreAttuale = giocatori[turnoCorrente];
+    
+    int scelta;
+    cout << "Scegli il numero della carta da giocare (oppure scrivi -1 per pescare): ";
+    cin >> scelta;
+
+    // Caso 1: Il giocatore decide (o deve) pescare
+    if (scelta == -1) {
+        cout << "\n-> " << giocatoreAttuale.getNome() << " pesca una carta dal mazzo!" << endl;
+        giocatoreAttuale.pescaCarta(mazzo.pesca());
+        passaAlProssimoGiocatore();
+        return;
+    }
+
+    // Caso 2: Il giocatore prova a giocare una carta
+    Carta cartaScelta = giocatoreAttuale.giocaCarta(scelta);
+
+    if (mossaValida(cartaScelta)) {
+        cout << "\n-> Mossa accettata! Hai giocato: ";
+        if (latoOscuroAttivo) cout << cartaScelta.getDescrizioneOscura() << endl;
+        else cout << cartaScelta.getDescrizioneChiara() << endl;
+
+        // Aggiorniamo il tavolo
+        cartaInCima = cartaScelta;
+        coloreAttivo = cartaInCima.getColore(latoOscuroAttivo);
+        
+        // Qui in futuro chiameremo applicaEffetto(cartaScelta) per le carte speciali!
+        
+        passaAlProssimoGiocatore();
+    } else {
+        // Se ha barato o sbagliato, gli ridiamo la carta in mano e gli facciamo ripetere il turno
+        cout << "\n❌ MOSSA NON VALIDA! La carta non combacia. Riprova." << endl;
+        giocatoreAttuale.pescaCarta(cartaScelta); 
+    }
+}
+
+// Lasciamo ancora vuoti questi due, li faremo dopo
 bool Partita::partitaTerminata() { return false; }
-bool Partita::mossaValida(Carta c) { return true; }
 void Partita::applicaEffetto(Carta c) {}
-void Partita::passaAlProssimoGiocatore() {}
