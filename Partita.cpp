@@ -116,5 +116,36 @@ void Partita::eseguiTurno() {
 }
 
 // Lasciamo ancora vuoti questi due, li faremo dopo
-bool Partita::partitaTerminata() { return false; }
-void Partita::applicaEffetto(Carta c) {}
+bool Partita::partitaTerminata() {
+    for (int i = 0; i < giocatori.size(); i++) {
+        if (giocatori[i].haFinitoLeCarte()) {
+            cout << "\n🏆🏆🏆 VITTORIA! 🏆🏆🏆" << endl;
+            cout << "Il giocatore " << giocatori[i].getNome() << " ha finito le carte!" << endl;
+            return true;
+        }
+    }
+    return false; // Nessuno ha ancora vinto, il gioco continua
+}
+
+void Partita::applicaEffetto(Carta c) {
+    Valore v = c.getValore(latoOscuroAttivo);
+
+    if (v == INVERTI) {
+        cout << "🔄 CAMBIO GIRO! Il verso di gioco è stato invertito." << endl;
+        sensoOrario = !sensoOrario;
+    } 
+    else if (v == SALTA || v == SALTA_TUTTI) {
+        cout << "🚫 SALTA TURNO! Il prossimo giocatore viene saltato." << endl;
+        // Chiamando questo metodo una volta extra qui, e una volta a fine turno,
+        // di fatto "saltiamo" la persona successiva!
+        passaAlProssimoGiocatore(); 
+    }
+    else if (v == FLIP) {
+        cout << "\n🌌 *WUSH* 🌌 IL MAZZO SI GIRA!!!" << endl;
+        // Invertiamo lo stato del lato oscuro
+        latoOscuroAttivo = !latoOscuroAttivo; 
+        
+        // Aggiorniamo subito il colore attivo sul tavolo in base al nuovo lato!
+        coloreAttivo = cartaInCima.getColore(latoOscuroAttivo);
+    }
+}
