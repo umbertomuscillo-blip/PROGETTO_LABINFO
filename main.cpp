@@ -1,15 +1,18 @@
 #include <iostream>
-#include "Carta.h" // Importiamo il "menu" della nostra carta
+#include "Carta.h"
 
 using namespace std;
 
 int main() {
-    cout << "Avvio simulazione UNO Flip..." << endl;
+    // Creiamo una carta "Flip"
+    Carta miaCarta(ROSSO, FLIP, ARANCIONE, FLIP);
 
-    // Creiamo una carta: Lato chiaro = 1 Rosso, Lato oscuro = Pesca Cinque Arancione
-    Carta primaCarta(ROSSO, UNO, ARANCIONE, PESCA_CINQUE);
-
-    cout << "Ho creato la mia prima carta in memoria!" << endl;
+    cout << "--- TEST CARTA ---" << endl;
+    cout << "Lato Chiaro: " << miaCarta.getDescrizioneChiara() << endl;
+    cout << "Lato Oscuro: " << miaCarta.getDescrizioneOscura() << endl;
 
     return 0;
 }
+
+
+
