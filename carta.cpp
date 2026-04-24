@@ -1,6 +1,6 @@
 #include "Carta.h"
 
-// Costruttore
+// Implementazione del costruttore: assegna i valori passati alle variabili della carta
 Carta::Carta(Colore cChiaro, Valore vChiaro, Colore cOscuro, Valore vOscuro) {
     coloreChiaro = cChiaro;
     valoreChiaro = vChiaro;
@@ -43,11 +43,20 @@ std::string valoreToString(Valore v) {
     }
 }
 
-// I metodi pubblici che useremo nel main
+// I metodi pubblici per la stampa a schermo
 std::string Carta::getDescrizioneChiara() {
     return valoreToString(valoreChiaro) + " " + coloreToString(coloreChiaro);
 }
 
 std::string Carta::getDescrizioneOscura() {
     return valoreToString(valoreOscuro) + " " + coloreToString(coloreOscuro);
+}
+
+// I metodi pubblici che restituiscono i veri valori alla classe Partita per i controlli
+Colore Carta::getColore(bool latoOscuro) {
+    return latoOscuro ? coloreOscuro : coloreChiaro; // Se è oscuro restituisce oscuro, sennò chiaro
+}
+
+Valore Carta::getValore(bool latoOscuro) {
+    return latoOscuro ? valoreOscuro : valoreChiaro; // Stessa cosa per il valore
 }

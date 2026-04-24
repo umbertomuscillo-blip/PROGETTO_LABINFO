@@ -1,33 +1,31 @@
 #include <iostream>
-#include "Carta.h"
-#include "Mazzo.h"
-#include "Giocatore.h"
+#include <vector>
+#include "Partita.h"
 
 using namespace std;
 
 int main() {
-    cout << "--- AVVIO UNO FLIP ---" << endl;
+    cout << "--- BENVENUTI A UNO FLIP ---" << endl;
     
-    Mazzo mazzoDiGioco;
-    mazzoDiGioco.mescola();
-    
-    // Creiamo due giocatori
-    Giocatore g1("Umberto");
-    Giocatore g2("Prof. Vessio");
+    // Creiamo una lista di nomi
+    vector<string> giocatori;
+    giocatori.push_back("Umberto");
+    giocatori.push_back("Prof. Vessio");
 
-    // Distribuiamo 7 carte a testa come da regole ufficiali
-    cout << "\nDistribuzione carte..." << endl;
-    for(int i = 0; i < 7; i++) {
-        g1.pescaCarta(mazzoDiGioco.pesca());
-        g2.pescaCarta(mazzoDiGioco.pesca());
+    // Avviamo il "cervello" del gioco
+    Partita gioco(giocatori);
+
+    // Diciamo alla partita di fare mescolamento e distribuzione
+    gioco.setupIniziale();
+
+    // Mostriamo il tavolo pronto per il primo turno!
+        // Il cuore del gioco: un ciclo che continua finché la partita non finisce!
+    while (!gioco.partitaTerminata()) {
+        gioco.eseguiTurno();
     }
-
-    // Mostriamo la mano di Umberto (Lato Chiaro, come all'inizio della partita)
-    g1.mostraMano(false);
-
-    // Simuliamo che qualcuno giochi un FLIP! Mostriamo di nuovo la mano, ma al rovescio
-    cout << "\n*** E' STATA GIOCATA LA CARTA FLIP! ***" << endl;
-    g1.mostraMano(true);
 
     return 0;
 }
+
+
+   

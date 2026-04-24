@@ -3,6 +3,7 @@
 
 #include <string>
 
+// Definiamo i Colori possibili (sia per il lato chiaro che oscuro)
 // NERO serve per le carte Jolly che non hanno un colore di base
 enum Colore { 
     ROSSO, GIALLO, VERDE, BLU,           // Colori Lato Chiaro
@@ -33,10 +34,16 @@ private:
     Valore valoreOscuro;
 
 public:
+    // Costruttore
     Carta(Colore cChiaro, Valore vChiaro, Colore cOscuro, Valore vOscuro);
 
+    // Metodi per ottenere la descrizione testuale da mostrare a schermo
     std::string getDescrizioneChiara();
     std::string getDescrizioneOscura();
+
+    // Nuovi metodi fondamentali: permettono alla Partita di "leggere" le carte
+    Colore getColore(bool latoOscuro);
+    Valore getValore(bool latoOscuro);
 };
 
 #endif
