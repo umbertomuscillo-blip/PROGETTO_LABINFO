@@ -2,6 +2,7 @@
 #define PARTITA_H
 
 #include <vector>
+#include <string>
 #include "Mazzo.h"
 #include "Giocatore.h"
 
@@ -16,20 +17,24 @@ private:
     Colore coloreAttivo;
 
 public:
-    // Ora passiamo direttamente gli oggetti Giocatore, così sappiamo chi è il Bot!
     Partita(std::vector<Giocatore> listaGiocatori);
 
     void setupIniziale();
-    void eseguiTurno();
+    void eseguiTurno(); 
     bool partitaTerminata();
     std::string getVincitore();
     bool mossaValida(Carta c);
     void applicaEffetto(Carta c);
     void passaAlProssimoGiocatore();
     void stampaStatoPartita();
+
+    // Metodi per la Grafica
     Carta getCartaInCima();
     bool getLatoOscuroAttivo();
     std::vector<Giocatore> getGiocatori();
+    int getTurnoCorrente();
+    void mossaUmano(int scelta);
+    void mossaBot();
 };
 
 #endif
