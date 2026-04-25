@@ -27,6 +27,9 @@ public:
     void applicaEffetto(Carta c);
     void passaAlProssimoGiocatore();
     void stampaStatoPartita();
+    Carta getCartaInCima();
+    bool getLatoOscuroAttivo();
+    std::vector<Giocatore> getGiocatori();
 };
 
 #endif

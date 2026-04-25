@@ -207,3 +207,6 @@ string Partita::getVincitore() {
     }
     return ""; // Nessuno ha ancora vinto
 }
+Carta Partita::getCartaInCima() { return cartaInCima; }
+bool Partita::getLatoOscuroAttivo() { return latoOscuroAttivo; }
+vector<Giocatore> Partita::getGiocatori() { return giocatori; }
