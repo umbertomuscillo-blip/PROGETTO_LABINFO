@@ -199,3 +199,11 @@ void Partita::applicaEffetto(Carta c) {
         passaAlProssimoGiocatore();
     }
 }
+string Partita::getVincitore() {
+    for (int i = 0; i < giocatori.size(); i++) {
+        if (giocatori[i].haFinitoLeCarte()) {
+            return giocatori[i].getNome();
+        }
+    }
+    return ""; // Nessuno ha ancora vinto
+}

@@ -22,6 +22,7 @@ public:
     void setupIniziale();
     void eseguiTurno();
     bool partitaTerminata();
+    std::string getVincitore();
     bool mossaValida(Carta c);
     void applicaEffetto(Carta c);
     void passaAlProssimoGiocatore();
