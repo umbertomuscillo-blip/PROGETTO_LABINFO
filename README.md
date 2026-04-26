@@ -1,71 +1,82 @@
 # PROGETTO_LABINFO
-🃏 Progetto Laboratorio di Informatica: UNO Flip
+🃏 Progetto Laboratorio di Informatica: UNO Flip! (Edizione 30 e Lode)
 
-Questo repository contiene il caso di studio "UNO" esteso con le regole di "UNO Flip".
-Il progetto è strutturato per soddisfare i requisiti avanzati (30 e lode), includendo classi C++, architettura Client-Server, interfaccia grafica (GUI) e salvataggio su Database (DBMS).
+Questo repository contiene il caso di studio "UNO" esteso con le regole ufficiali di "UNO Flip".
+Il progetto è stato sviluppato per soddisfare i requisiti avanzati del corso, includendo logica Object-Oriented in C++, Interfaccia Grafica 2D (SFML), Intelligenza Artificiale, salvataggio persistente su Database e architettura di Rete Client-Server.
 
-🌳 Architettura del Software
+---
 
-Di seguito è riportato il diagramma a blocchi che illustra le dipendenze e la struttura del nostro codice:
+## 🌳 Architettura del Software (Pattern MVC)
 
-[mermaid]
+Il codice è stato progettato applicando rigorosamente il Design Pattern **Model-View-Controller (MVC)** e il principio dell'**Incapsulamento**. La logica pura del gioco è totalmente disaccoppiata dall'interfaccia visiva.
+
+Di seguito il diagramma a blocchi delle dipendenze:
+
+```mermaid
 graph TD
-    subgraph Base ["1. ENTITÀ DI BASE (I Mattoncini)"]
+    subgraph Base ["1. ENTITÀ DI BASE (Model)"]
         C(Carta <br/> Lato Chiaro/Oscuro)
         M(Mazzo <br/> Genera e Mescola)
         G(Giocatore <br/> Gestisce la Mano)
-        GU(Giocatore Umano <br/> Input Tastiera/Mouse)
-        GB(Giocatore Bot <br/> Intelligenza Artificiale)
-        
-        G --- GU
-        G --- GB
     end
 
-    subgraph Motore ["2. MOTORE DEL GIOCO (Il Cervello)"]
+    subgraph Motore ["2. MOTORE DEL GIOCO (Controller)"]
         P{Partita <br/> Direttore d'orchestra}
         P -->|Controlla| M
         P -->|Gestisce i turni di| G
     end
 
-    subgraph Architettura ["3. ARCHITETTURA 30 E LODE"]
-        DB[(Database DBMS <br/> Salva Statistiche)]
-        S[Server <br/> Valida la logica]
-        CL([Client GUI <br/> Interfaccia Grafica])
+    subgraph Architettura ["3. ARCHITETTURA AVANZATA (View & Rete)"]
+        DB[(Database CSV <br/> Salva Statistiche)]
+        S[Server Socket <br/> Valida la logica]
+        CL([Client SFML <br/> Interfaccia Grafica])
+        GB(Bot IA <br/> Intelligenza Artificiale)
         
-        CL <-->|Invia Mosse| S
+        CL <-->|Invia Mosse / Riceve Dati| S
         S <-->|Salva/Carica| DB
         S -->|Gestisce| P
+        P -->|Innesca| GB
     end
 
 
 🚀 Milestone di Sviluppo
+[x] 1. Logica di base Carta e Mazzo: Generazione, mescolamento e doppia faccia.
 
-1. [Completata] Logica di base Carta e Mazzo
+[x] 2. Logica Giocatore: Gestione memoria dinamica (std::vector) della mano.
 
-2. [In corso] Logica Giocatore (Umano e Bot)
+[x] 3. Controller Partita: Applicazione millimetrica del regolamento ufficiale.
 
-3. [Da fare] Controller Partita
+[x] 4. Interfaccia Grafica (GUI): Integrazione completa libreria SFML 3.
 
-4. [Da fare] Integrazione DBMS
+[x] 5. Integrazione DBMS: Salvataggio e lettura persistente delle statistiche.
 
-5. [Da fare] Rete Client-Server e GUI
+[x] 6. Intelligenza Artificiale: Bot autonomo integrato nel Game Loop.
 
+[ ] 7. Rete Client-Server: Socket per multiplayer su macchine diverse (In Lavorazione).
 
+✨ Funzionalità Tecniche Implementate (Current Build)
+Attualmente il gioco è un'applicazione desktop completa, robusta e responsiva.
 
+⚙️ Motore di Gioco (Core Engine)
 
+Generazione Dinamica: 112 carte generate assemblando casualmente "Mezze Carte" chiare e oscure, garantendo combinazioni fronte/retro uniche ad ogni nuova partita.
 
-✅ FASE 1 COMPLETATA: Il Motore di Gioco Centrale (Core Engine)
+Eccezioni Ufficiali 1vs1: Le carte "Inverti" e "Salta" sono calcolate matematicamente per bloccare il turno dell'avversario nelle partite a 2 giocatori.
 
-Abbiamo un gioco solido, testato e funzionante nel terminale.
+Validazione Assoluta: Il sistema impedisce mosse illegali, riconoscendo colori, numeri e applicando automaticamente le penitenze (+1, +5, Pesca Colore).
 
-Carta & Mazzo: Generazione dinamica di 112 carte con lati chiari e oscuri mescolati in modo asincrono (niente abbinamenti scontati).
+🖥️ Grafica e UI (SFML)
 
-Giocatori: Gestione dinamica della mano di carte (pesca, scarta, visualizzazione adattiva lato chiaro/oscuro).
+Macchina a Stati (FSM): Gestione fluida delle transizioni tra Menu Principale, Game Loop e Schermata di Fine Partita (senza memory leaks tramite allocazione/deallocazione dinamica della Partita).
 
-Partita & Turni: Flusso circolare perfetto, gestione dell'inversione di marcia e controllo di chiusura (vittoria).
+Letterboxing e Resize: Adattamento automatico della telecamera (sf::View) in caso di ridimensionamento della finestra, mantenendo intatto l'aspect ratio e la precisione dei click del mouse.
 
-Regole & Validazione: Impossibile barare. Il gioco riconosce colori e numeri.
+Collision Detection Adattiva: Algoritmo matematico per l'overlapping delle carte in mano. Se il giocatore accumula troppe carte, l'interfaccia le sovrappone verso il centro calcolando il click in base allo Z-Index visivo (cliccando sempre la carta in cima).
 
-Effetti Speciali: Il mazzo "Flippa", i Jolly fanno scegliere il colore (con comunicazione a schermo al prossimo giocatore), e le penalità (Pesca 1, Pesca 5, Pesca Colore, Salta) vengono inflitte correttamente all'avversario.
+Meccanica "UNO!": Implementato un pulsante a schermo. Se il giocatore gioca la penultima carta senza prima aver premuto "UNO!", il motore gli infligge dinamicamente 2 carte di penalità.
 
-Eccezioni Ufficiali: Inverti che vale come Salta per 2 giocatori.
+🧠 IA e Persistenza Dati
+
+Bot Greedy: L'avversario CPU analizza la propria mano ed esegue mosse valide (inclusa la scelta strategica del colore sui Jolly) simulando un tempo di pensiero umano (Delay Timer).
+
+Database (CSV): Utilizzo della libreria fstream (ifstream/ofstream e stringstream) per caricare lo storico vittorie all'avvio e aggiornare il database locale a partita conclusa.

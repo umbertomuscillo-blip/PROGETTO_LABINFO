@@ -1,3 +1,10 @@
+/**
+ * @file main_grafico.cpp
+ * @brief Punto di ingresso (Entry Point) dell'applicazione grafica UNO Flip.
+ * Gestisce il Game Loop, il rendering con la libreria SFML, l'input dell'utente (mouse/tastiera)
+ * e la Macchina a Stati (Menu, Gioco in corso, Schermata Finale).
+ */
+
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <iostream>
@@ -9,10 +16,26 @@
 
 using namespace std;
 
-// --- STATI DEL GIOCO ---
+// ==============================================================================
+// MACCHINA A STATI E FUNZIONI HELPER GRAFICHE
+// ==============================================================================
+
+/**
+ * @enum StatoGioco
+ * @brief Definisce i possibili stati dell'applicazione (Finite State Machine).
+ * Permette al Game Loop di sapere quale schermata renderizzare in ogni momento.
+ */
 enum StatoGioco { MENU, IN_CORSO, FINE };
 
-// --- FUNZIONI HELPER GRAFICHE ---
+/**
+ * @brief Utility per generare rapidamente un pulsante interattivo a schermo.
+ * @param rect Il rettangolo (forma geometrica) passato per riferimento.
+ * @param testo L'oggetto testo (SFML 3.0) passato per riferimento.
+ * @param font Il font caricato in memoria.
+ * @param etichetta Il testo che apparirà sul bottone.
+ * @param x, y Coordinate spaziali.
+ * @param colore Il colore di sfondo del pulsante.
+ */
 void creaBottone(sf::RectangleShape& rect, sf::Text& testo, sf::Font& font, string etichetta, float x, float y, sf::Color colore) {
     rect.setSize({350.f, 80.f});
     rect.setPosition({x, y});
@@ -27,14 +50,21 @@ void creaBottone(sf::RectangleShape& rect, sf::Text& testo, sf::Font& font, stri
     testo.setPosition({x + 20.f, y + 25.f}); 
 }
 
+/**
+ * @brief Configura la grafica e la posizione di una singola carta (con effetto Ombra 3D).
+ * Legge i dati logici della carta (valore e colore) e li trasforma in un elemento visivo.
+ */
 void impostaGraficaCarta(sf::RectangleShape& rect, sf::RectangleShape& ombra, sf::Text& testo, Carta cartaDati, bool latoOscuro, sf::Font& font, float x, float y) {
+    // 1. Configurazione Ombra (leggermente sfasata in basso a destra)
     ombra.setSize({115.f, 150.f});
     ombra.setPosition({x + 6.f, y + 6.f});
-    ombra.setFillColor(sf::Color(0, 0, 0, 100));
+    ombra.setFillColor(sf::Color(0, 0, 0, 100)); // Nero con trasparenza
     
+    // 2. Configurazione Rettangolo Carta
     rect.setSize({115.f, 150.f});
     rect.setPosition({x, y});
     
+    // 3. Mapping dei colori dalla logica alla grafica
     string desc = latoOscuro ? cartaDati.getDescrizioneOscura() : cartaDati.getDescrizioneChiara();
     sf::Color bgColor = sf::Color(30, 30, 30); 
     if (desc.find("Rosso") != string::npos) bgColor = sf::Color(220, 20, 20);
@@ -50,6 +80,7 @@ void impostaGraficaCarta(sf::RectangleShape& rect, sf::RectangleShape& ombra, sf
     rect.setOutlineThickness(2.f);
     rect.setOutlineColor(sf::Color(255, 255, 255, 200));
     
+    // 4. Formattazione Testo e abbreviazioni per far stare tutto nella carta
     testo.setFont(font);
     if (desc == "Jolly (Nessun colore base)") desc = "Jolly";
     if (desc == "Jolly Pesca Due (Nessun colore base)") desc = "Jolly\n+2";
@@ -64,6 +95,9 @@ void impostaGraficaCarta(sf::RectangleShape& rect, sf::RectangleShape& ombra, sf
     testo.setPosition({x + 8.f, y + 40.f}); 
 }
 
+/**
+ * @brief Traduce l'enum logico 'Colore' in un oggetto sf::Color di SFML.
+ */
 sf::Color getSFMLColor(Colore c) {
     switch(c) {
         case ROSSO: return sf::Color(220, 20, 20);
@@ -78,8 +112,13 @@ sf::Color getSFMLColor(Colore c) {
     }
 }
 
+// ==============================================================================
+// FUNZIONE MAIN E GAME LOOP
+// ==============================================================================
+
 int main()
 {
+    // Creazione della Finestra e della Telecamera (View)
     sf::RenderWindow window(sf::VideoMode({1024, 768}), "UNO Flip! - Premium Edition");
     sf::View view(sf::FloatRect({0.f, 0.f}, {1024.f, 768.f}));
     window.setView(view);
@@ -90,9 +129,9 @@ int main()
         return -1;
     }
 
-    // --- VARIABILI GLOBALI ---
+    // --- VARIABILI GLOBALI DI STATO ---
     StatoGioco statoAttuale = MENU;
-    Partita* gioco = nullptr; 
+    Partita* gioco = nullptr; // Puntatore dinamico allocato solo quando si preme "Gioca"
     
     // --- SETUP MENU ---
     sf::Text titolo(font, "UNO FLIP!", 80);
@@ -102,7 +141,6 @@ int main()
     titolo.setOutlineColor(sf::Color::Red);
 
     sf::RectangleShape btnServer, btnClient;
-    // SFML 3: Devono avere il font da subito!
     sf::Text txtServer(font), txtClient(font); 
     creaBottone(btnServer, txtServer, font, "CREA PARTITA (Server)", 337.f, 300.f, sf::Color(20, 100, 20));
     creaBottone(btnClient, txtClient, font, "UNISCITI (Client)", 337.f, 420.f, sf::Color(20, 50, 150));
@@ -117,7 +155,6 @@ int main()
     testoClassifica.setFillColor(sf::Color::White);
     
     sf::RectangleShape btnTornaMenu;
-    // SFML 3: Deve avere il font
     sf::Text txtTornaMenu(font);
     creaBottone(btnTornaMenu, txtTornaMenu, font, "TORNA AL MENU", 337.f, 600.f, sf::Color(200, 30, 30));
 
@@ -147,7 +184,7 @@ int main()
     btnUno.setPosition({850.f, 650.f}); btnUno.setFillColor(sf::Color::Red); btnUno.setOutlineThickness(3.f);
     sf::Text testoUno(font, "UNO!", 24); testoUno.setPosition({880.f, 665.f});
     
-    sf::Clock timerBot;
+    sf::Clock timerBot; // Timer essenziale per evitare che il Bot giochi in zero millisecondi
     bool botPensando = false, modalitaSceltaColore = false, haDettoUno = false, penalitaInflitta = false;
     int indiceJollyInSospeso = -1;
 
@@ -158,36 +195,43 @@ int main()
         btnColori[i].setOutlineThickness(2.f);
     }
 
-    // --- GAME LOOP ---
+    // ==========================================================================
+    // INIZIO DEL GAME LOOP (Eseguito ad ogni frame)
+    // ==========================================================================
     while (window.isOpen())
     {
+        // 1. Convertiamo le coordinate grezze del mouse nelle coordinate mondiali della View
         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
         sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
+        // 2. POLLING DEGLI EVENTI (Chiusura finestra, Click, Ridimensionamento)
         while (const std::optional<sf::Event> event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>()) window.close();
 
-            // GESTIONE RESIZE
+            // GESTIONE RESIZE: Tecnica del "Letterboxing" per mantenere l'aspect ratio (1024x768)
             if (const auto* resized = event->getIf<sf::Event::Resized>()) {
                 float windowRatio = (float)resized->size.x / (float)resized->size.y;
                 float viewRatio = 1024.f / 768.f;
                 float sizeX = 1.f, sizeY = 1.f, posX = 0.f, posY = 0.f;
+                // Aggiungiamo bande nere laterali o verticali a seconda del rapporto d'aspetto
                 if (windowRatio > viewRatio) { sizeX = viewRatio / windowRatio; posX = (1.f - sizeX) / 2.f; }
                 else { sizeY = windowRatio / viewRatio; posY = (1.f - sizeY) / 2.f; }
                 view.setViewport(sf::FloatRect({posX, posY}, {sizeX, sizeY}));
                 window.setView(view);
             }
 
+            // GESTIONE CLICK DEL MOUSE
             if (event->is<sf::Event::MouseButtonPressed>() && event->getIf<sf::Event::MouseButtonPressed>()->button == sf::Mouse::Button::Left)
             {
-                // 1. CLICK NEL MENU
+                // STATO: MENU INIZIALE
                 if (statoAttuale == MENU) {
+                    // Creiamo dinamicamente la Partita quando l'utente seleziona un'opzione
                     if (btnServer.getGlobalBounds().contains(mousePos) || btnClient.getGlobalBounds().contains(mousePos)) {
                         vector<Giocatore> giocatori;
                         giocatori.push_back(Giocatore("Umberto", false));
                         giocatori.push_back(Giocatore("Prof. Vessio", true));
-                        gioco = new Partita(giocatori);
+                        gioco = new Partita(giocatori); // Allocazione dinamica sulla Heap
                         gioco->setupIniziale();
                         
                         modalitaSceltaColore = false; haDettoUno = false; penalitaInflitta = false; botPensando = false;
@@ -195,12 +239,13 @@ int main()
                         cout << "[SISTEMA] Partita Iniziata!" << endl;
                     }
                 }
-                // 2. CLICK IN GIOCO
+                // STATO: PARTITA IN CORSO
                 else if (statoAttuale == IN_CORSO && gioco != nullptr) {
                     int turno = gioco->getTurnoCorrente();
                     bool latoOscuro = gioco->getLatoOscuroAttivo();
                     vector<Carta> miaMano = gioco->getGiocatori()[0].getMano();
 
+                    // Se è stato giocato un Jolly, si blocca l'input sulle carte e si aspettano i pulsanti colore
                     if (modalitaSceltaColore) {
                         for(int c=0; c<4; c++) {
                             if (btnColori[c].getGlobalBounds().contains(mousePos)) {
@@ -211,21 +256,24 @@ int main()
                         }
                     } else if (turno == 0 && !gioco->partitaTerminata()) {
                         
+                        // Controllo Pulsante UNO
                         if (miaMano.size() == 2 && btnUno.getGlobalBounds().contains(mousePos)) {
                             haDettoUno = true; btnUno.setFillColor(sf::Color::Green); penalitaInflitta = false;
                         }
 
+                        // Pesca dal mazzo
                         if (mazzoGrafico.getGlobalBounds().contains(mousePos)) {
                             gioco->mossaUmano(-1, 0, haDettoUno); 
                             penalitaInflitta = false;
                         }
                         
+                        // Calcolo per il Collision Detection delle carte impilate dinamicamente
                         float maxSpazioMano = 800.f;
                         float spaziatura = min(120.f, maxSpazioMano / max(1.f, (float)miaMano.size())); 
                         float startX = (1024.f - ((miaMano.size() - 1) * spaziatura + 115.f)) / 2.f;
 
+                        // Iterazione Inversa: controlliamo prima le carte disegnate "sopra" alle altre
                         for(int i = miaMano.size() - 1; i >= 0; i--) {
-                            // SFML 3: FloatRect usa {{x, y}, {width, height}}
                             sf::FloatRect bounds({startX + (i * spaziatura), 600.f}, {115.f, 150.f});
                             if (bounds.contains(mousePos)) {
                                 if (gioco->mossaValida(miaMano[i])) {
@@ -240,15 +288,15 @@ int main()
                                         btnUno.setFillColor(sf::Color::Red);
                                     }
                                 }
-                                break; 
+                                break; // Interrompe il ciclo per non cliccare la carta che sta sotto!
                             }
                         }
                     }
                 }
-                // 3. CLICK FINE PARTITA
+                // STATO: FINE PARTITA
                 else if (statoAttuale == FINE) {
                     if (btnTornaMenu.getGlobalBounds().contains(mousePos)) {
-                        delete gioco; gioco = nullptr;
+                        delete gioco; gioco = nullptr; // Libera la memoria per evitare Memory Leaks!
                         statoAttuale = MENU;
                     }
                 }
@@ -260,9 +308,9 @@ int main()
             if (gioco->partitaTerminata()) {
                 statoAttuale = FINE;
                 testoVincitore.setString("VINCITORE: " + gioco->getVincitore());
-                // SFML 3: getGlobalBounds().size.x
                 testoVincitore.setPosition({(1024.f - testoVincitore.getGlobalBounds().size.x) / 2.f, 150.f}); 
                 
+                // Legge i dati salvati dal Database locale CSV
                 string classificaStr = "CLASSIFICA (dal Database):\n";
                 ifstream file("classifica.csv");
                 if (file.is_open()) {
@@ -275,6 +323,7 @@ int main()
                 testoClassifica.setString(classificaStr);
                 testoClassifica.setPosition({337.f, 250.f});
             }
+            // Timer del Bot per rendere realistica l'attesa (1.5s)
             else if (gioco->getTurnoCorrente() == 1 && !modalitaSceltaColore) {
                 if (!botPensando) { timerBot.restart(); botPensando = true; } 
                 else if (timerBot.getElapsedTime().asSeconds() > 1.5f) { 
@@ -283,7 +332,9 @@ int main()
             }
         }
 
-        // --- DISEGNO ---
+        // ==========================================================================
+        // DISEGNO DELLA SCHERMATA
+        // ==========================================================================
         window.clear(sf::Color(20, 20, 20));
 
         if (statoAttuale == MENU) {
@@ -296,6 +347,7 @@ int main()
             vector<Carta> miaMano = gioco->getGiocatori()[0].getMano();
             vector<Carta> manoBot = gioco->getGiocatori()[1].getMano(); 
 
+            // Il tavolo cambia colore a seconda se è avvenuto un FLIP!
             sfondoTavolo.setFillColor(latoOscuro ? sf::Color(30, 20, 30) : sf::Color(20, 90, 40));
             mazzoGrafico.setFillColor(latoOscuro ? sf::Color(80, 0, 120) : sf::Color(10, 30, 150));
             indicatoreColore.setFillColor(getSFMLColor(gioco->getColoreAttivo()));
@@ -307,6 +359,7 @@ int main()
             window.draw(cartaCentroOmbra); window.draw(cartaCentroShape); window.draw(testoCartaCentro);
             window.draw(indicatoreColore); window.draw(testoIndicatore);
             
+            // Disegno dinamico della mano dell'umano
             float maxSpazioMano = 800.f;
             float spaziatura = min(120.f, maxSpazioMano / max(1.f, (float)miaMano.size())); 
             float startX = (1024.f - ((miaMano.size() - 1) * spaziatura + 115.f)) / 2.f;
@@ -316,6 +369,7 @@ int main()
                 window.draw(ombra); window.draw(rect); window.draw(testo);
             }
 
+            // Disegno dei Dorsi delle carte del Bot
             float maxSpazioBot = 600.f;
             float spaziaturaBot = min(50.f, maxSpazioBot / max(1.f, (float)manoBot.size()));
             float startXBot = (1024.f - ((manoBot.size() - 1) * spaziaturaBot + 60.f)) / 2.f;
@@ -335,6 +389,7 @@ int main()
 
             if (miaMano.size() == 2) { window.draw(btnUno); window.draw(testoUno); }
 
+            // Se serve, disegna in sovraimpressione il menu di scelta colore
             if (modalitaSceltaColore) {
                 if (!latoOscuro) {
                     btnColori[0].setFillColor(sf::Color(220, 20, 20)); btnColori[1].setFillColor(sf::Color(240, 190, 0)); 
@@ -352,9 +407,10 @@ int main()
             window.draw(btnTornaMenu); window.draw(txtTornaMenu);
         }
 
-        window.display();             
+        window.display(); // Push dei pixel allo schermo             
     }
 
+    // Pulizia finale (Safe Delete)
     if (gioco != nullptr) delete gioco;
     return 0;
 }
