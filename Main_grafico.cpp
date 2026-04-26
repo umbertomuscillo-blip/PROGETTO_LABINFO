@@ -123,6 +123,9 @@ int main()
     sf::View view(sf::FloatRect({0.f, 0.f}, {1024.f, 768.f}));
     window.setView(view);
 
+    // LIMITATORE DI FRAME: Impedisce alla CPU di calcolare frame inutili, evitando il surriscaldamento
+    window.setFramerateLimit(60);
+
     sf::Font font;
     if (!font.openFromFile("font.ttf")) {
         cout << "Errore caricamento font.ttf" << endl;
