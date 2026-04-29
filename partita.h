@@ -1,6 +1,6 @@
 /**
  * @file Partita.h
- * @brief Definizione della classe centrale Partita.
+ * @brief Definizione della classe Partita. Gestisce le regole, i turni e gli effetti di UNO Flip.
  */
 
 #ifndef PARTITA_H
@@ -8,50 +8,57 @@
 
 #include <vector>
 #include <string>
-#include "Mazzo.h"
 #include "Giocatore.h"
+#include "Mazzo.h"
 
 class Partita {
 private:
     std::vector<Giocatore> giocatori;
     Mazzo mazzo;
+    std::vector<Carta> scarti;
+    
     int turnoCorrente;
     bool sensoOrario;
     bool latoOscuroAttivo;
-    Carta cartaInCima;
     Colore coloreAttivo;
-    std::string ultimoLogBot;
+    
+    bool partitaFinita;
+    std::string vincitore;
     
     std::string messaggioAvviso;
-    bool mostraAvviso;
+    bool mostraAvvisoPopup;
+    std::string ultimoLogBot;
+
+    void passaTurno();
+    void applicaEffettoCarta(Carta c, int coloreScelto = 0);
+    void mostraAvviso(std::string msg);
 
 public:
     Partita(std::vector<Giocatore> listaGiocatori);
-
-    void setupIniziale();
-    void eseguiTurno(); 
-    bool partitaTerminata();
-    std::string getVincitore();
-    bool mossaValida(Carta c);
-    void applicaEffetto(Carta c);
-    void passaAlProssimoGiocatore();
-    void stampaStatoPartita();
-
-    Carta getCartaInCima();
-    Colore getColoreAttivo();
-    bool getLatoOscuroAttivo();
-    std::vector<Giocatore> getGiocatori();
-    int getTurnoCorrente();
-    std::string getUltimoLogBot();
-    bool getSensoOrario(); // <-- NUOVO METODO!
     
-    std::string getMessaggioAvviso();
-    bool getMostraAvviso();
-    void impostaAvviso(std::string msg);
-    void resetAvviso();
-
-    void mossaUmano(int scelta, int coloreScelto = 0, bool haDettoUno = false);
+    void setupIniziale();
+    
+    bool mossaValida(Carta c);
+    
+    // --- METODI DI INTERAZIONE ---
+    void mossaUmano(int indiceCarta, int coloreScelto, bool dettoUno);
     void mossaBot();
+    void mossaRete(int indiceCarta, int coloreScelto, bool dettoUno); // NUOVO: Per il Multiplayer!
+
+    // --- GETTERS ---
+    std::vector<Giocatore> getGiocatori() const;
+    Carta getCartaInCima() const;
+    Colore getColoreAttivo() const;
+    bool getLatoOscuroAttivo() const;
+    int getTurnoCorrente() const;
+    bool getSensoOrario() const;
+    bool partitaTerminata() const;
+    std::string getVincitore() const;
+    
+    std::string getMessaggioAvviso() const;
+    bool getMostraAvviso() const;
+    void resetAvviso();
+    std::string getUltimoLogBot() const;
 };
 
 #endif

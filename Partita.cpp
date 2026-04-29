@@ -1,206 +1,295 @@
 /**
  * @file Partita.cpp
- * @brief Implementazione del motore logico del gioco.
+ * @brief Implementazione della logica di gioco di UNO Flip.
  */
 
 #include "Partita.h"
 #include <iostream>
-#include <cstdlib>
+#include <algorithm>
 
 using namespace std;
 
-Partita::Partita(vector<Giocatore> listaGiocatori) : cartaInCima(ROSSO, UNO, ROSSO, UNO) {
-    giocatori = listaGiocatori; 
-    turnoCorrente = 0;             
-    sensoOrario = true;            
-    latoOscuroAttivo = false;      
-    ultimoLogBot = "In attesa...";
-    mostraAvviso = false;
-    messaggioAvviso = "";
+Partita::Partita(vector<Giocatore> listaGiocatori) {
+    giocatori = listaGiocatori;
+    turnoCorrente = 0;
+    sensoOrario = true;
+    latoOscuroAttivo = false;
+    partitaFinita = false;
+    vincitore = "";
+    mostraAvvisoPopup = false;
+    ultimoLogBot = "Partita Iniziata!";
 }
 
 void Partita::setupIniziale() {
-    mazzo.mescola();
+    mazzo = Mazzo(); // Ricrea un mazzo nuovo
+    mazzo.mescola(); // Usa il seme di srand() del main_grafico per il Lockstep di rete
+
+    // Distribuisci 7 carte a testa (usando pescaCarta uno per uno)
     for (int i = 0; i < 7; i++) {
-        for (int j = 0; j < giocatori.size(); j++) giocatori[j].pescaCarta(mazzo.pesca());
+        for (auto& g : giocatori) {
+            g.pescaCarta(mazzo.pesca());
+        }
     }
-    cartaInCima = mazzo.pesca();
-    coloreAttivo = cartaInCima.getColore(latoOscuroAttivo);
+
+    // Gira la prima carta
+    Carta primaCarta = mazzo.pesca();
+    
+    // Evita che la prima carta sia un Jolly (continua a pescare finché non esce un colore normale)
+    while (primaCarta.getColore(false) == NERO) {
+        primaCarta = mazzo.pesca();
+    }
+    
+    scarti.push_back(primaCarta);
+    coloreAttivo = primaCarta.getColore(false);
 }
 
-void Partita::stampaStatoPartita() { }
+void Partita::mostraAvviso(string msg) {
+    messaggioAvviso = msg;
+    mostraAvvisoPopup = true;
+}
+
+void Partita::passaTurno() {
+    if (partitaFinita) return;
+
+    if (sensoOrario) {
+        turnoCorrente = (turnoCorrente + 1) % giocatori.size();
+    } else {
+        turnoCorrente = (turnoCorrente - 1 + giocatori.size()) % giocatori.size();
+    }
+}
 
 bool Partita::mossaValida(Carta c) {
-    Colore coloreCarta = c.getColore(latoOscuroAttivo);
-    Valore valoreCarta = c.getValore(latoOscuroAttivo);
-    if (coloreCarta == NERO) return true;
-    if (coloreCarta == coloreAttivo || valoreCarta == cartaInCima.getValore(latoOscuroAttivo)) return true;
-    return false; 
+    Carta inCima = scarti.back();
+    Colore cCima = coloreAttivo;
+    Valore vCima = inCima.getValore(latoOscuroAttivo);
+
+    Colore cMano = c.getColore(latoOscuroAttivo);
+    Valore vMano = c.getValore(latoOscuroAttivo);
+
+    // I Jolly si possono sempre giocare
+    if (cMano == NERO) return true;
+
+    // Stesso colore o stesso valore/simbolo
+    if (cMano == cCima || vMano == vCima) return true;
+
+    return false;
 }
 
-void Partita::passaAlProssimoGiocatore() {
-    if (sensoOrario) turnoCorrente = (turnoCorrente + 1) % giocatori.size();
-    else turnoCorrente = (turnoCorrente - 1 + giocatori.size()) % giocatori.size();
-}
-
-std::string Partita::getMessaggioAvviso() { return messaggioAvviso; }
-bool Partita::getMostraAvviso() { return mostraAvviso; }
-void Partita::impostaAvviso(std::string msg) { 
-    messaggioAvviso = msg; 
-    mostraAvviso = true; 
-}
-void Partita::resetAvviso() { mostraAvviso = false; }
-
-
-void Partita::applicaEffetto(Carta c) {
-    Valore v = c.getValore(latoOscuroAttivo);
-    int prossimo = sensoOrario ? (turnoCorrente + 1) % giocatori.size() : (turnoCorrente - 1 + giocatori.size()) % giocatori.size();
+void Partita::applicaEffettoCarta(Carta c, int coloreScelto) {
+    scarti.push_back(c);
     
-    string nomeAttaccante = giocatori[turnoCorrente].getNome();
-    string nomeVittima = giocatori[prossimo].getNome();
+    Colore cMano = c.getColore(latoOscuroAttivo);
+    Valore vMano = c.getValore(latoOscuroAttivo);
 
-    if (v == INVERTI) {
-        sensoOrario = !sensoOrario;
-        if (giocatori.size() == 2) {
-            impostaAvviso(nomeAttaccante + " inverte e mantiene il turno!");
-            passaAlProssimoGiocatore(); 
-        } else {
-            impostaAvviso("Giro invertito!");
+    // Gestione Jolly
+    if (cMano == NERO) {
+        switch (coloreScelto) {
+            case 0: coloreAttivo = latoOscuroAttivo ? ROSA : ROSSO; break;
+            case 1: coloreAttivo = latoOscuroAttivo ? VERDE_ACQUA : GIALLO; break;
+            case 2: coloreAttivo = latoOscuroAttivo ? ARANCIONE : VERDE; break;
+            case 3: coloreAttivo = latoOscuroAttivo ? VIOLA : BLU; break;
+            default: coloreAttivo = latoOscuroAttivo ? ROSA : ROSSO; break;
         }
-    } 
-    else if (v == SALTA || v == SALTA_TUTTI) {
-        impostaAvviso(nomeAttaccante + " fa saltare il turno a " + nomeVittima + "!");
-        passaAlProssimoGiocatore(); 
+    } else {
+        coloreAttivo = cMano;
     }
-    else if (v == FLIP) {
-        latoOscuroAttivo = !latoOscuroAttivo; 
-        coloreAttivo = cartaInCima.getColore(latoOscuroAttivo);
-        impostaAvviso("FLIP! Il tavolo si e' capovolto!");
-    }
-    else if (v == PESCA_UNO) {
-        giocatori[prossimo].pescaCarta(mazzo.pesca());
-        impostaAvviso(nomeAttaccante + " lancia un +1!\n" + nomeVittima + " pesca e salta!");
-        passaAlProssimoGiocatore(); 
-    }
-    else if (v == PESCA_CINQUE) {
-        for(int i = 0; i < 5; i++) giocatori[prossimo].pescaCarta(mazzo.pesca());
-        impostaAvviso(nomeAttaccante + " lancia un +5!\n" + nomeVittima + " pesca 5 e salta!");
-        passaAlProssimoGiocatore();
-    }
-    else if (v == JOLLY_PESCA_DUE) {
-        for(int i = 0; i < 2; i++) giocatori[prossimo].pescaCarta(mazzo.pesca());
-        impostaAvviso(nomeAttaccante + " gioca Jolly +2!\n" + nomeVittima + " pesca 2 e salta!");
-        passaAlProssimoGiocatore();
-    }
-    else if (v == JOLLY_PESCA_COLORE) {
-        bool trovato = false;
-        int contatore = 0;
-        while (!trovato) {
-            Carta pescata = mazzo.pesca();
-            giocatori[prossimo].pescaCarta(pescata);
-            contatore++;
-            if (pescata.getColore(latoOscuroAttivo) == coloreAttivo) trovato = true;
-        }
-        impostaAvviso(nomeAttaccante + " gioca Jolly Colore!\n" + nomeVittima + " ha pescato " + to_string(contatore) + " carte!");
-        passaAlProssimoGiocatore();
-    }
-}
 
-Carta Partita::getCartaInCima() { return cartaInCima; }
-Colore Partita::getColoreAttivo() { return coloreAttivo; }
-bool Partita::getLatoOscuroAttivo() { return latoOscuroAttivo; }
-vector<Giocatore> Partita::getGiocatori() { return giocatori; }
-int Partita::getTurnoCorrente() { return turnoCorrente; }
-string Partita::getUltimoLogBot() { return ultimoLogBot; }
-bool Partita::getSensoOrario() { return sensoOrario; } // <-- IL GETTER PER LA UI
-
-void Partita::mossaUmano(int scelta, int coloreScelto, bool haDettoUno) {
-    Giocatore& g = giocatori[turnoCorrente];
-    
-    if (scelta == -1) {
-        g.pescaCarta(mazzo.pesca());
-        passaAlProssimoGiocatore();
+    // Se chi ha appena giocato ha zero carte, ha vinto!
+    if (giocatori[turnoCorrente].getMano().empty()) {
+        partitaFinita = true;
+        vincitore = giocatori[turnoCorrente].getNome();
         return;
     }
-    
-    Carta cartaScelta = g.giocaCarta(scelta);
-    if (mossaValida(cartaScelta)) {
-        cartaInCima = cartaScelta;
-        coloreAttivo = cartaInCima.getColore(latoOscuroAttivo);
-        
-        if (coloreAttivo == NERO) {
-            Colore chiari[] = {ROSSO, GIALLO, VERDE, BLU};
-            Colore oscuri[] = {ROSA, VERDE_ACQUA, ARANCIONE, VIOLA};
-            if (!latoOscuroAttivo) coloreAttivo = chiari[coloreScelto]; 
-            else coloreAttivo = oscuri[coloreScelto];
+
+    // Applicazione Effetti Speciali
+    if (vMano == INVERTI) {
+        if (giocatori.size() == 2) {
+            passaTurno(); // In 1v1 Inverti equivale a Salta
+        } else {
+            sensoOrario = !sensoOrario;
         }
-        
-        if (g.getMano().size() == 1 && !haDettoUno) {
-            g.pescaCarta(mazzo.pesca());
-            g.pescaCarta(mazzo.pesca());
-            impostaAvviso("Hai dimenticato di dire UNO!\nPenalita' di 2 carte!");
-        }
-        
-        applicaEffetto(cartaScelta);
-        passaAlProssimoGiocatore();
-    } else {
-        g.pescaCarta(cartaScelta); 
+        mostraAvviso("Giro invertito!");
+        passaTurno();
+    } 
+    else if (vMano == SALTA) {
+        mostraAvviso("Turno saltato!");
+        passaTurno();
+        passaTurno();
     }
+    else if (vMano == SALTA_TUTTI) {
+        mostraAvviso("TUTTI SALTANO! Ritocca a te!");
+    }
+    else if (vMano == PESCA_UNO) {
+        passaTurno();
+        giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+        mostraAvviso(giocatori[turnoCorrente].getNome() + " pesca 1 carta!");
+        passaTurno();
+    }
+    else if (vMano == PESCA_CINQUE) {
+        passaTurno();
+        for(int i = 0; i < 5; i++) {
+            giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+        }
+        mostraAvviso(giocatori[turnoCorrente].getNome() + " pesca 5 CARTE!");
+        passaTurno();
+    }
+    else if (vMano == FLIP) {
+        latoOscuroAttivo = !latoOscuroAttivo;
+        mostraAvviso(latoOscuroAttivo ? "LATO OSCURO ATTIVATO!" : "LATO CHIARO ATTIVATO!");
+        coloreAttivo = c.getColore(latoOscuroAttivo); 
+        passaTurno();
+    }
+    else if (vMano == JOLLY_PESCA_DUE) {
+        passaTurno();
+        for(int i = 0; i < 2; i++) {
+            giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+        }
+        mostraAvviso(giocatori[turnoCorrente].getNome() + " pesca 2 carte!");
+        passaTurno();
+    }
+    else if (vMano == JOLLY_PESCA_COLORE) {
+        passaTurno();
+        int cartePescate = 0;
+        bool trovato = false;
+        while (!trovato) {
+            Carta pescata = mazzo.pesca();
+            giocatori[turnoCorrente].pescaCarta(pescata);
+            cartePescate++;
+            if (pescata.getColore(latoOscuroAttivo) == coloreAttivo) {
+                trovato = true;
+            }
+        }
+        mostraAvviso(giocatori[turnoCorrente].getNome() + " pesca " + to_string(cartePescate) + " carte!");
+        passaTurno();
+    }
+    else {
+        // Carta normale
+        passaTurno();
+    }
+}
+
+void Partita::mossaUmano(int indiceCarta, int coloreScelto, bool dettoUno) {
+    if (partitaFinita) return;
+
+    if (indiceCarta == -1) {
+        // Ha pescato
+        giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+        if (giocatori[turnoCorrente].getMano().back().getColore(latoOscuroAttivo) != NERO) {
+            passaTurno(); 
+        }
+        return;
+    }
+
+    Carta c = giocatori[turnoCorrente].getMano()[indiceCarta];
+    
+    // Regola UNO!
+    if (giocatori[turnoCorrente].getMano().size() == 2 && !dettoUno) {
+        mostraAvviso("NON HAI DETTO UNO! +2 Carte di penalita'!");
+        giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+        giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+    }
+
+    // Assumiamo che la tua funzione per calare una carta si chiami giocaCarta
+    giocatori[turnoCorrente].giocaCarta(indiceCarta);
+    applicaEffettoCarta(c, coloreScelto);
 }
 
 void Partita::mossaBot() {
-    Giocatore& g = giocatori[turnoCorrente];
-    int scelta = -1;
-    vector<Carta> manoBot = g.getMano();
+    if (partitaFinita) return;
+
+    Giocatore& bot = giocatori[turnoCorrente];
+    vector<Carta> mano = bot.getMano(); // Copia della mano per analizzarla
     
-    for (int i = 0; i < manoBot.size(); i++) {
-        if (mossaValida(manoBot[i])) { scelta = i; break; }
+    if (mano.size() == 2) {
+        ultimoLogBot = bot.getNome() + " grida: UNO!";
     }
+
+    int indiceGiocabile = -1;
     
-    if (scelta == -1) {
-        g.pescaCarta(mazzo.pesca());
-        ultimoLogBot = "Il Bot ha pescato una carta.";
-        passaAlProssimoGiocatore();
-    } else {
-        Carta cartaScelta = g.giocaCarta(scelta);
-        cartaInCima = cartaScelta;
-        coloreAttivo = cartaInCima.getColore(latoOscuroAttivo);
-        
-        string nomeC = latoOscuroAttivo ? cartaScelta.getDescrizioneOscura() : cartaScelta.getDescrizioneChiara();
-        
-        if (coloreAttivo == NERO) {
-            Colore chiari[] = {ROSSO, GIALLO, VERDE, BLU};
-            Colore oscuri[] = {ROSA, VERDE_ACQUA, ARANCIONE, VIOLA};
-            int r = rand() % 4; 
-            if (!latoOscuroAttivo) coloreAttivo = chiari[r]; 
-            else coloreAttivo = oscuri[r];
-            
-            string nomeNuovoColore = "";
-            if (!latoOscuroAttivo) {
-                if (r == 0) nomeNuovoColore = "Rosso"; else if (r == 1) nomeNuovoColore = "Giallo";
-                else if (r == 2) nomeNuovoColore = "Verde"; else nomeNuovoColore = "Blu";
-            } else {
-                if (r == 0) nomeNuovoColore = "Rosa"; else if (r == 1) nomeNuovoColore = "Verde Acqua";
-                else if (r == 2) nomeNuovoColore = "Arancione"; else nomeNuovoColore = "Viola";
-            }
-            nomeC += " (Nuovo colore: " + nomeNuovoColore + ")";
-            if (cartaScelta.getValore(latoOscuroAttivo) == JOLLY) {
-                impostaAvviso(g.getNome() + " cambia colore!\nAdesso si gioca sul " + nomeNuovoColore);
+    // Ricerca carta speciale
+    for (int i = 0; i < mano.size(); i++) {
+        if (mossaValida(mano[i])) {
+            Valore v = mano[i].getValore(latoOscuroAttivo);
+            if (v == PESCA_CINQUE || v == SALTA_TUTTI || v == JOLLY_PESCA_COLORE) {
+                indiceGiocabile = i;
+                break;
             }
         }
+    }
+
+    // Ricerca carta normale
+    if (indiceGiocabile == -1) {
+        for (int i = 0; i < mano.size(); i++) {
+            if (mossaValida(mano[i])) {
+                indiceGiocabile = i;
+                break;
+            }
+        }
+    }
+
+    if (indiceGiocabile != -1) {
+        Carta c = mano[indiceGiocabile];
+        int coloreScelto = rand() % 4;
         
-        ultimoLogBot = "Giocata: " + nomeC;
-        applicaEffetto(cartaScelta);
-        passaAlProssimoGiocatore();
+        string coloreSceltoStr = "";
+        if (c.getColore(latoOscuroAttivo) == NERO) {
+            if (!latoOscuroAttivo) {
+                if (coloreScelto == 0) coloreSceltoStr = "Rosso"; else if (coloreScelto == 1) coloreSceltoStr = "Giallo";
+                else if (coloreScelto == 2) coloreSceltoStr = "Verde"; else if (coloreScelto == 3) coloreSceltoStr = "Blu";
+            } else {
+                if (coloreScelto == 0) coloreSceltoStr = "Rosa"; else if (coloreScelto == 1) coloreSceltoStr = "Verde Acqua";
+                else if (coloreScelto == 2) coloreSceltoStr = "Arancione"; else if (coloreScelto == 3) coloreSceltoStr = "Viola";
+            }
+            ultimoLogBot = bot.getNome() + " gioca Jolly. Sceglie: " + coloreSceltoStr;
+        } else {
+            ultimoLogBot = bot.getNome() + " ha giocato una carta.";
+        }
+
+        bot.giocaCarta(indiceGiocabile);
+        applicaEffettoCarta(c, coloreScelto);
+    } else {
+        // Pesca
+        ultimoLogBot = bot.getNome() + " non ha carte. Pesca.";
+        bot.pescaCarta(mazzo.pesca());
+        passaTurno();
     }
 }
 
-void Partita::eseguiTurno() { }
-bool Partita::partitaTerminata() {
-    for (int i = 0; i < giocatori.size(); i++) if (giocatori[i].haFinitoLeCarte()) return true;
-    return false;
+// ==========================================
+// FUNZIONE PER IL MULTIPLAYER (DETERMINISTIC)
+// ==========================================
+void Partita::mossaRete(int indiceCarta, int coloreScelto, bool dettoUno) {
+    if (partitaFinita) return;
+
+    if (indiceCarta == -1) {
+        giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+        if (giocatori[turnoCorrente].getMano().back().getColore(latoOscuroAttivo) != NERO) {
+            passaTurno(); 
+        }
+        return;
+    }
+
+    Carta c = giocatori[turnoCorrente].getMano()[indiceCarta];
+    
+    if (giocatori[turnoCorrente].getMano().size() == 2 && !dettoUno) {
+        mostraAvviso(giocatori[turnoCorrente].getNome() + " NON HA DETTO UNO! +2 CARTE");
+        giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+        giocatori[turnoCorrente].pescaCarta(mazzo.pesca());
+    }
+
+    giocatori[turnoCorrente].giocaCarta(indiceCarta);
+    applicaEffettoCarta(c, coloreScelto);
 }
-string Partita::getVincitore() {
-    for (int i = 0; i < giocatori.size(); i++) if (giocatori[i].haFinitoLeCarte()) return giocatori[i].getNome();
-    return "";
-}
+
+vector<Giocatore> Partita::getGiocatori() const { return giocatori; }
+Carta Partita::getCartaInCima() const { return scarti.back(); }
+Colore Partita::getColoreAttivo() const { return coloreAttivo; }
+bool Partita::getLatoOscuroAttivo() const { return latoOscuroAttivo; }
+int Partita::getTurnoCorrente() const { return turnoCorrente; }
+bool Partita::getSensoOrario() const { return sensoOrario; }
+bool Partita::partitaTerminata() const { return partitaFinita; }
+string Partita::getVincitore() const { return vincitore; }
+string Partita::getMessaggioAvviso() const { return messaggioAvviso; }
+bool Partita::getMostraAvviso() const { return mostraAvvisoPopup; }
+void Partita::resetAvviso() { mostraAvvisoPopup = false; }
+string Partita::getUltimoLogBot() const { return ultimoLogBot; }
