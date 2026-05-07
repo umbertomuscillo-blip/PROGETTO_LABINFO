@@ -1,6 +1,6 @@
 /**
  * @file Partita.h
- * @brief Definizione della classe Partita. Gestisce le regole, i turni e gli effetti di UNO Flip.
+ * @brief Definizione della classe Partita.
  */
 
 #ifndef PARTITA_H
@@ -35,17 +35,17 @@ private:
 
 public:
     Partita(std::vector<Giocatore> listaGiocatori);
-    
     void setupIniziale();
-    
     bool mossaValida(Carta c);
     
-    // --- METODI DI INTERAZIONE ---
     void mossaUmano(int indiceCarta, int coloreScelto, bool dettoUno);
     void mossaBot();
-    void mossaRete(int indiceCarta, int coloreScelto, bool dettoUno); // NUOVO: Per il Multiplayer!
+    void mossaRete(int indiceCarta, int coloreScelto, bool dettoUno); 
 
-    // --- GETTERS ---
+    // --- NUOVE FUNZIONI PER RAGE QUIT E CONTESTAZIONE ---
+    void assegnaPenalitaUno(int idGiocatore);
+    void forzaFinePartita(std::string nomeVincitore);
+
     std::vector<Giocatore> getGiocatori() const;
     Carta getCartaInCima() const;
     Colore getColoreAttivo() const;
