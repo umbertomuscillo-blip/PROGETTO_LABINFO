@@ -45,15 +45,15 @@ std::string valoreToString(Valore v) {
         case UNO: return "1"; case DUE: return "2"; case TRE: return "3";
         case QUATTRO: return "4"; case CINQUE: return "5"; case SEI: return "6";
         case SETTE: return "7"; case OTTO: return "8"; case NOVE: return "9";
-        case SALTA: return "Salta Turno";
-        case SALTA_TUTTI: return "Salta Tutti";
-        case INVERTI: return "Inverti";
-        case FLIP: return "Flip";
-        case PESCA_UNO: return "Pesca Uno";
-        case PESCA_CINQUE: return "Pesca Cinque";
-        case JOLLY: return "Jolly";
-        case JOLLY_PESCA_DUE: return "Jolly Pesca Due";
-        case JOLLY_PESCA_COLORE: return "Jolly Pesca Colore";
+        case SALTA: return "SAL";
+        case SALTA_TUTTI: return "ALL";
+        case INVERTI: return "INV";
+        case FLIP: return "FLP";
+        case PESCA_UNO: return "+1";
+        case PESCA_CINQUE: return "+5";
+        case JOLLY: return "JOL";
+        case JOLLY_PESCA_DUE: return "JOL +2";
+        case JOLLY_PESCA_COLORE: return "COL";
         default: return "Sconosciuto";
     }
 }

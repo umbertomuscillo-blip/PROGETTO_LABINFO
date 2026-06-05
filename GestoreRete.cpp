@@ -63,8 +63,8 @@ bool ClientRete::connetti(std::string ip, unsigned short porta) {
     std::optional<sf::IpAddress> address = sf::IpAddress::resolve(ip);
     if (!address.has_value()) return false;
 
-    // Se non trova il server, si arrende dopo solo 2 secondi, evitando freeze lunghi
-    if (socket.connect(address.value(), porta, sf::seconds(2.f)) != sf::Socket::Status::Done) {
+    // Se non trova il server, si arrende dopo 5 secondi, evitando freeze lunghi ma dando il tempo a Whisky di risolvere la rete
+    if (socket.connect(address.value(), porta, sf::seconds(5.f)) != sf::Socket::Status::Done) {
         cout << "[CLIENT-ERRORE] Impossibile connettersi al Server!" << endl;
         return false;
     }

@@ -7,8 +7,20 @@
 
 #include "Mazzo.h"
 #include <iostream>
-#include <algorithm> // Necessario per std::shuffle
-#include <random>    // Necessario per std::default_random_engine
+#include <algorithm>
+#include <random>
+
+static uint32_t seed_rete = 12345;
+
+void Mazzo::impostaSeedRete(uint32_t seed) {
+    seed_rete = seed;
+}
+
+uint32_t Mazzo::ottieniNumeroCasuale() {
+    seed_rete = seed_rete * 1664525 + 1013904223;
+    return seed_rete;
+}
+
 
 /**
  * @brief Costruttore del Mazzo. 
@@ -71,9 +83,12 @@ void Mazzo::inizializzaMazzo() {
     }
 
     // --- FASE 2: RANDOMIZZAZIONE DEGLI ABBINAMENTI (ORA SINCRONIZZATA DALLA RETE) ---
-    // Invece di usare chrono, usiamo rand() così l'incollaggio fronte-retro 
-    // sarà identico su entrambi i computer della partita Multiplayer!
-    std::shuffle(latiOscuri.begin(), latiOscuri.end(), std::default_random_engine(rand()));
+    // Usiamo il nostro generatore pseudo-casuale per garantire che la sequenza
+    // sia identica byte per byte su compilatori e OS diversi (Mac vs Windows).
+    for (size_t i = latiOscuri.size() - 1; i > 0; --i) {
+        size_t j = ottieniNumeroCasuale() % (i + 1);
+        std::swap(latiOscuri[i], latiOscuri[j]);
+    }
 
     // --- FASE 3: INCOLLAGGIO ---
     for (int i = 0; i < latiChiari.size(); i++) {
@@ -88,13 +103,12 @@ void Mazzo::inizializzaMazzo() {
  * @brief Mescola l'intero mazzo finito (Le carte già incollate).
  */
 void Mazzo::mescola() {
-    // Usiamo std::default_random_engine "nutrito" dalla funzione rand().
-    // Poiché abbiamo sincronizzato rand() tramite la rete in main_grafico,
-    // ora questo motore produrrà l'ESATTA stessa sequenza su entrambi i PC!
-    auto motoreRete = std::default_random_engine(rand());
-    
-    // Corretto: Usa carteDaPescare invece di "carte"
-    std::shuffle(carteDaPescare.begin(), carteDaPescare.end(), motoreRete);
+    // Usiamo il nostro generatore custom per lo shuffle, per evitare che 
+    // std::shuffle produca risultati diversi tra libc++ (Mac) e libstdc++ (Windows).
+    for (size_t i = carteDaPescare.size() - 1; i > 0; --i) {
+        size_t j = ottieniNumeroCasuale() % (i + 1);
+        std::swap(carteDaPescare[i], carteDaPescare[j]);
+    }
 }
 
 /**
@@ -118,4 +132,17 @@ Carta Mazzo::pesca() {
  */
 void Mazzo::scarta(Carta c) {
     carteScartate.push_back(c);
+}
+
+std::vector<Carta> Mazzo::getCarteDaPescare() const {
+    return carteDaPescare;
+}
+
+std::vector<Carta> Mazzo::getCarteScartate() const {
+    return carteScartate;
+}
+
+void Mazzo::setMazzoDaStato(std::vector<Carta> daPescare, std::vector<Carta> scartate) {
+    carteDaPescare = daPescare;
+    carteScartate = scartate;
 }

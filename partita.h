@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include "Giocatore.h"
 #include "Mazzo.h"
 
@@ -45,6 +46,10 @@ public:
     // --- NUOVE FUNZIONI PER RAGE QUIT E CONTESTAZIONE ---
     void assegnaPenalitaUno(int idGiocatore);
     void forzaFinePartita(std::string nomeVincitore);
+
+    // --- NUOVE FUNZIONI PER SALVATAGGIO E CARICAMENTO ---
+    bool salvaPartita(std::string filename);
+    static std::unique_ptr<Partita> caricaPartita(std::string filename);
 
     std::vector<Giocatore> getGiocatori() const;
     Carta getCartaInCima() const;

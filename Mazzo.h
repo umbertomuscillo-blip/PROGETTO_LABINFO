@@ -9,6 +9,7 @@
 #define MAZZO_H
 
 #include <vector>
+#include <cstdint>
 #include "Carta.h" // Il Mazzo è un contenitore di oggetti Carta
 
 /**
@@ -45,6 +46,9 @@ public:
      */
     void inizializzaMazzo();
 
+    static void impostaSeedRete(uint32_t seed);
+    static uint32_t ottieniNumeroCasuale();
+
     /**
      * @brief Applica un algoritmo di randomizzazione al vettore delle carte da pescare.
      */
@@ -69,6 +73,10 @@ public:
      * @return Un intero che rappresenta la dimensione (size) del vettore carteDaPescare.
      */
     int carteRimanenti();
+    
+    std::vector<Carta> getCarteDaPescare() const;
+    std::vector<Carta> getCarteScartate() const;
+    void setMazzoDaStato(std::vector<Carta> daPescare, std::vector<Carta> scartate);
 };
 
 #endif

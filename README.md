@@ -52,7 +52,7 @@ graph TD
 
 [x] 6. Intelligenza Artificiale: Bot autonomo integrato nel Game Loop.
 
-[ ] 7. Rete Client-Server: Socket per multiplayer su macchine diverse (In Lavorazione).
+[x] 7. Rete Client-Server: Socket TCP non bloccanti per multiplayer LAN multi-piattaforma (Mac/Windows).
 
 ✨ Funzionalità Tecniche Implementate (Current Build)
 Attualmente il gioco è un'applicazione desktop completa, robusta e responsiva.
@@ -80,3 +80,8 @@ Meccanica "UNO!": Implementato un pulsante a schermo. Se il giocatore gioca la p
 Bot Greedy: L'avversario CPU analizza la propria mano ed esegue mosse valide (inclusa la scelta strategica del colore sui Jolly) simulando un tempo di pensiero umano (Delay Timer).
 
 Database (CSV): Utilizzo della libreria fstream (ifstream/ofstream e stringstream) per caricare lo storico vittorie all'avvio e aggiornare il database locale a partita conclusa.
+
+🌐 Rete e Multiplayer (TCP)
+
+Sincronizzazione Deterministica: Per garantire la compatibilità cross-platform tra architetture diverse (Mac/Windows) è stato sviluppato un generatore di numeri pseudo-casuali (LCG) custom. Questo assicura che il mescolamento dei mazzi generi l'esatta identica sequenza di carte su tutti i client a partire da un seme condiviso.
+Socket Non-Bloccanti: Implementazione di connessioni TCP asincrone (SFML Network) per non freezare il framerate del gioco durante l'attesa di ricezione dei pacchetti.

@@ -26,7 +26,7 @@ fi
 echo "🛠️  Compilazione di UNO Flip in corso..."
 
 # Il mega-comando di compilazione
-g++ -std=c++17 main_grafico.cpp Carta.cpp Mazzo.cpp Giocatore.cpp Partita.cpp Database.cpp GestoreRete.cpp -o unoflip_grafico -I/opt/homebrew/include -L/opt/homebrew/lib -lsfml-graphics -lsfml-window -lsfml-system -lsfml-network
+g++ -std=c++17 Main_grafico.cpp Carta.cpp Mazzo.cpp Giocatore.cpp Partita.cpp Database.cpp GestoreRete.cpp UIUtils.cpp SceneManager.cpp SoundManager.cpp LoginScene.cpp MenuScene.cpp LobbyScene.cpp LeaderboardScene.cpp EndGameScene.cpp GameScene.cpp -o unoflip_grafico -I/opt/homebrew/include -L/opt/homebrew/lib -lsfml-graphics -lsfml-window -lsfml-system -lsfml-network -lsfml-audio
 
 # Controlla se la compilazione è andata a buon fine
 if [ $? -eq 0 ]; then

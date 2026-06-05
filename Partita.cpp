@@ -4,7 +4,10 @@
  */
 
 #include "Partita.h"
+#include "SoundManager.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <algorithm>
 
 using namespace std;
@@ -71,7 +74,7 @@ void Partita::applicaEffettoCarta(Carta c, int coloreScelto) {
         Colore nuovoColore = c.getColore(latoOscuroAttivo);
         // FIX BUG JOLLY GRIGIO: Se la carta FLIP ha un Jolly dietro, forziamo un colore a caso per non bloccare il gioco!
         if (nuovoColore == NERO) {
-            int r = rand() % 4;
+            int r = Mazzo::ottieniNumeroCasuale() % 4;
             if (!latoOscuroAttivo) {
                 Colore chiari[] = {ROSSO, GIALLO, VERDE, BLU}; coloreAttivo = chiari[r];
             } else {
@@ -126,7 +129,7 @@ void Partita::mossaBot() {
     for (int i=0; i<mano.size(); i++) { if (mossaValida(mano[i])) { Valore v = mano[i].getValore(latoOscuroAttivo); if (v==PESCA_CINQUE || v==SALTA_TUTTI || v==JOLLY_PESCA_COLORE) { indiceGiocabile = i; break; } } }
     if (indiceGiocabile == -1) { for (int i=0; i<mano.size(); i++) { if (mossaValida(mano[i])) { indiceGiocabile = i; break; } } }
     if (indiceGiocabile != -1) {
-        Carta c = mano[indiceGiocabile]; int coloreScelto = rand() % 4;
+        Carta c = mano[indiceGiocabile]; int coloreScelto = Mazzo::ottieniNumeroCasuale() % 4;
         ultimoLogBot = bot.getNome() + " ha giocato una carta.";
         bot.giocaCarta(indiceGiocabile); applicaEffettoCarta(c, coloreScelto);
     } else {
@@ -158,3 +161,103 @@ string Partita::getMessaggioAvviso() const { return messaggioAvviso; }
 bool Partita::getMostraAvviso() const { return mostraAvvisoPopup; }
 void Partita::resetAvviso() { mostraAvvisoPopup = false; }
 string Partita::getUltimoLogBot() const { return ultimoLogBot; }
+
+bool Partita::salvaPartita(string filename) {
+    ofstream out(filename);
+    if (!out) return false;
+    
+    out << turnoCorrente << " " << sensoOrario << " " << latoOscuroAttivo << " " << coloreAttivo << " " << partitaFinita << "\n";
+    string v = vincitore.empty() ? "NESSUNO" : vincitore;
+    out << v << "\n";
+    
+    out << scarti.size() << "\n";
+    for (Carta c : scarti) {
+        out << c.getColore(false) << " " << c.getValore(false) << " " << c.getColore(true) << " " << c.getValore(true) << "\n";
+    }
+    
+    vector<Carta> daPescare = mazzo.getCarteDaPescare();
+    out << daPescare.size() << "\n";
+    for (Carta c : daPescare) {
+        out << c.getColore(false) << " " << c.getValore(false) << " " << c.getColore(true) << " " << c.getValore(true) << "\n";
+    }
+    
+    out << giocatori.size() << "\n";
+    for (Giocatore g : giocatori) {
+        out << g.getNome() << "\n";
+        out << g.getIsBot() << "\n";
+        vector<Carta> mano = g.getMano();
+        out << mano.size() << "\n";
+        for (Carta c : mano) {
+            out << c.getColore(false) << " " << c.getValore(false) << " " << c.getColore(true) << " " << c.getValore(true) << "\n";
+        }
+    }
+    
+    out.close();
+    return true;
+}
+
+std::unique_ptr<Partita> Partita::caricaPartita(string filename) {
+    ifstream in(filename);
+    if (!in) return nullptr;
+    
+    int tCorr, cAttivo;
+    bool sOrario, lOscuro, pFinita;
+    in >> tCorr >> sOrario >> lOscuro >> cAttivo >> pFinita;
+    string v;
+    std::getline(in >> std::ws, v);
+    
+    int numScarti;
+    in >> numScarti;
+    vector<Carta> scartiP;
+    for(int i=0; i<numScarti; i++) {
+        int cc, vc, co, vo;
+        in >> cc >> vc >> co >> vo;
+        scartiP.push_back(Carta((Colore)cc, (Valore)vc, (Colore)co, (Valore)vo));
+    }
+    
+    int numPescare;
+    in >> numPescare;
+    vector<Carta> daPescare;
+    for(int i=0; i<numPescare; i++) {
+        int cc, vc, co, vo;
+        in >> cc >> vc >> co >> vo;
+        daPescare.push_back(Carta((Colore)cc, (Valore)vc, (Colore)co, (Valore)vo));
+    }
+    
+    int numGiocatori;
+    in >> numGiocatori;
+    vector<Giocatore> gioca;
+    for(int i=0; i<numGiocatori; i++) {
+        string nome;
+        std::getline(in >> std::ws, nome);
+        bool isBot;
+        in >> isBot;
+        Giocatore g(nome, isBot);
+        int numCarte;
+        in >> numCarte;
+        for(int k=0; k<numCarte; k++) {
+            int cc, vc, co, vo;
+            in >> cc >> vc >> co >> vo;
+            g.pescaCarta(Carta((Colore)cc, (Valore)vc, (Colore)co, (Valore)vo));
+        }
+        gioca.push_back(g);
+    }
+    in.close();
+    
+    auto p = std::make_unique<Partita>(gioca);
+    p->turnoCorrente = tCorr;
+    p->sensoOrario = sOrario;
+    p->latoOscuroAttivo = lOscuro;
+    p->coloreAttivo = (Colore)cAttivo;
+    p->partitaFinita = pFinita;
+    p->vincitore = (v == "NESSUNO") ? "" : v;
+    
+    p->mazzo.setMazzoDaStato(daPescare, scartiP);
+    // Populate the base class vector (we overwrite it since the constructor used the new list but without cards)
+    p->giocatori = gioca;
+    p->scarti = scartiP; // Actually scarti is not strictly used since getCartaInCima relies on mazzo or Partita scarti. Wait! Partita has its own `scarti` vector?
+    // Let me check Partita.h: `std::vector<Carta> scarti;` Yes, we need to populate it.
+    p->scarti = scartiP;
+    
+    return p;
+}
