@@ -277,6 +277,13 @@
 <li><a href="#bug-3-il-letale-jolly-grigio-sotto-al-flip">BUG #3: Il Letale "Jolly Grigio" sotto al Flip</a></li>
 </ul>
 </li>
+<li><a href="#capitolo-7-motore-grafico-e-animazioni-sfml-avanzato">CAPITOLO 7: MOTORE GRAFICO E ANIMAZIONI (SFML AVANZATO)</a><ul>
+<li><a href="#1-il-sistema-particellare-i-fuochi-dartificio">1. Il Sistema Particellare (I Fuochi d'Artificio)</a></li>
+<li><a href="#2-le-animazioni-fisiche-delle-carte">2. Le Animazioni Fisiche delle Carte</a></li>
+<li><a href="#3-animazioni-dei-testi-il-gigantesco-uno">3. Animazioni dei Testi: Il gigantesco "UNO!"</a></li>
+<li><a href="#4-texture-e-sprite-come-si-caricano-le-immagini">4. Texture e Sprite (Come si caricano le immagini?)</a></li>
+</ul>
+</li>
 <li><a href="#curiosita-e-aneddoti-di-sviluppo">CURIOSITÀ E ANEDDOTI DI SVILUPPO</a></li>
 </ul>
 </li>
@@ -541,6 +548,47 @@ if (nuovoColore == NERO) {
 }
 </code></pre></div>
 <p>Il sistema ora percepisce la singolarità del Jolly, lo annulla e fa "rollare" al computer un dado invisibile a 4 facce per inventarsi un colore legale, salvando la partita dal congelamento.</p>
+<hr />
+<h2 id="capitolo-7-motore-grafico-e-animazioni-sfml-avanzato">CAPITOLO 7: MOTORE GRAFICO E ANIMAZIONI (SFML AVANZATO)</h2>
+<p>Un gioco non è nulla senza una veste grafica accattivante. A differenza di Unity o Unreal Engine (dove sposti oggetti con il mouse), in <strong>SFML</strong> tutto ciò che vedi sullo schermo è disegnato matematicamente, pixel per pixel, tramite codice C++. 
+In questo progetto non esistono file video (<code>.mp4</code> o <code>.mov</code>): ogni effetto visivo, animazione o fuoco d'artificio è letteralmente "calcolato" in tempo reale (a 60 frame al secondo). Ecco come.</p>
+<h3 id="1-il-sistema-particellare-i-fuochi-dartificio">1. Il Sistema Particellare (I Fuochi d'Artificio)</h3>
+<p>Sia nella schermata di fine partita (<code>EndGameScene</code>) che in quella iniziale (<code>MenuScene</code>), vedi decine di piccoli punti colorati esplodere o fluttuare. Come sono fatti?
+Nel file <code>UIUtils.cpp</code> abbiamo creato una classe <code>ParticleSystem</code> completamente custom. 
+- Una "particella" non è altro che un <code>sf::CircleShape</code> minuscolo (un cerchietto).
+- Quando il sistema viene inizializzato, creiamo un <code>std::vector</code> contenente centinaia di particelle.
+- <strong>La Fisica:</strong> A ciascuna particella viene assegnata una <code>velocità</code> (vettore X, Y) casuale. Se attiviamo la modalità "Fuochi d'Artificio", il codice aggiunge artificialmente il peso della <strong>Gravità</strong>! Ad ogni frame, la <code>velocità.y</code> viene aumentata, simulando la caduta parabolica tipica dei veri fuochi d'artificio. In più, la trasparenza (il canale Alpha del colore) si riduce gradualmente finché la particella non "muore" scomparendo.</p>
+<h3 id="2-le-animazioni-fisiche-delle-carte">2. Le Animazioni Fisiche delle Carte</h3>
+<p>Hai notato che quando clicchi una carta in mano, questa non "teletrasporta" al centro del tavolo, ma ci <em>vola</em> fisicamente in una frazione di secondo?
+Questo è possibile grazie a una tecnica matematica chiamata <strong>Interpolazione Lineare (Lerp)</strong>.
+In <code>GameScene.h</code> esiste una struttura dedicata:</p>
+<div class="code-wrapper"><pre><code class="language-cpp">struct CardAnim {
+    Carta carta;
+    sf::Vector2f startPos;
+    sf::Vector2f currentPos;
+    sf::Vector2f endPos;
+    float elapsedTime;
+    float duration; // Solitamente 0.3 secondi
+    bool toCenter;
+};
+</code></pre></div>
+<p>Quando giochi una carta, invochiamo <code>addCardAnimation()</code>. Da quel momento, per i successivi 0.3 secondi, il Game Loop smette di disegnare la carta fissa in mano e inizia a calcolare, frame dopo frame, la sua posizione esatta <code>currentPos</code> lungo la retta immaginaria che unisce la tua mano (<code>startPos</code>) agli scarti (<code>endPos</code>). Una volta arrivata a destinazione, l'animazione viene distrutta dal vettore e la carta torna ad essere semplicemente disegnata in cima agli scarti.</p>
+<h3 id="3-animazioni-dei-testi-il-gigantesco-uno">3. Animazioni dei Testi: Il gigantesco "UNO!"</h3>
+<p>Quando qualcuno rimane con una sola carta, appare un colossale "UNO!" giallo bordato di rosso che svanisce dolcemente. Come facciamo?
+In <code>GameScene.cpp</code> abbiamo una variabile <code>testoAnimazioneUno</code>. Quando si attiva l'evento, facciamo partire un cronometro (<code>timerAnimazioneUno.restart()</code>).
+Nel metodo <code>render()</code>, il codice usa il tempo trascorso (da 0.0 a 1.0 secondi) per modificare dinamicamente la dimensione e la trasparenza:</p>
+<div class="code-wrapper"><pre><code class="language-cpp">float elapsed = timerAnimazioneUno.getElapsedTime().asSeconds(); 
+float alpha = 255 * (1.0f - elapsed); // Svanisce nel tempo
+float scala = 1.0f + (elapsed * 2.0f); // Si ingrandisce nel tempo
+testoAnimazioneUno.setScale({scala, scala}); 
+testoAnimazioneUno.setFillColor(sf::Color(255, 255, 0, alpha));
+</code></pre></div>
+<p>È un effetto da "Pop-Up" generato matematicamente: man mano che i millisecondi passano, il testo diventa sempre più grande (<code>scala</code>) ma sempre più invisibile (<code>alpha</code>).</p>
+<h3 id="4-texture-e-sprite-come-si-caricano-le-immagini">4. Texture e Sprite (Come si caricano le immagini?)</h3>
+<p>Per far apparire un pulsante o il dorso di una carta, ci servono le immagini su disco.
+In SFML caricare l'immagine 60 volte al secondo ucciderebbe il computer. Per questo si usano le <strong>Texture</strong> e gli <strong>Sprite</strong>:
+- La <strong><code>sf::Texture</code></strong> è l'immagine pesante vera e propria (<code>card_back.png</code>) che viene caricata dalla memoria del disco rigido alla velocissima VRAM della Scheda Video <strong>una sola volta</strong> all'avvio del programma.
+- Lo <strong><code>sf::Sprite</code></strong> è invece una specie di "pellicola di plastica" leggerissima su cui "spalmiamo" la texture. Possiamo creare 100 sprite diversi (100 carte in mano) che pescano tutti dalla stessa singola Texture, ruotandoli e spostandoli senza appesantire la memoria!</p>
 <hr />
 <h2 id="curiosita-e-aneddoti-di-sviluppo">CURIOSITÀ E ANEDDOTI DI SVILUPPO</h2>
 <ul>
