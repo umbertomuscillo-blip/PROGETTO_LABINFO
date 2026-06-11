@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manuale Didattico UNO Flip!</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Include Highlight.js per il Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <!-- Include Mermaid.js per i flowchart -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -136,6 +147,25 @@
         }
 
         /* CODE BLOCKS */
+        .mermaid {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin: 40px 0;
+        }
+
+        /* Stile Immagini Screenshot */
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            margin: 40px auto;
+            display: block;
+        }
+
         .code-wrapper {
             background: var(--code-bg);
             border-radius: 12px;
@@ -243,6 +273,7 @@ Il cuore di SFML è il <strong>Game Loop</strong>: un ciclo <code>while (window.
 <p>Abbiamo strutturato il gioco esattamente così:
 1. <strong>Il Modello (La Cucina):</strong> Sono le classi <code>Partita</code>, <code>Carta</code>, <code>Mazzo</code>, <code>Giocatore</code>. Loro sanno giocare a UNO Flip, sanno chi ha vinto e quali sono le regole. Ma non sanno cos'è uno schermo, un mouse o un colore rosso acceso in RGB.
 2. <strong>La Vista e il Controller (I Camerieri):</strong> È la classe <code>GameScene</code> (grafica SFML). Lei sa disegnare bei bottoni, catturare i click del mouse e suonare effetti audio, ma è "stupida": non conosce le regole di UNO.</p>
+<p><img alt="Sfondo Menu" src="menu_bg.png" /></p>
 <p><strong>Come comunicano?</strong>
 Quando clicchi col mouse su una carta, il <em>Cameriere</em> (<code>GameScene</code>) avvisa la <em>Cucina</em> (<code>Partita</code>): "Ehi, il giocatore ha cliccato la carta numero 2!". La <em>Cucina</em> elabora la mossa, cambia il turno, aggiorna le variabili interne. Al frame successivo (1/60esimo di secondo dopo), il <em>Cameriere</em> guarda in <em>Cucina</em>, vede che lo stato del tavolo è cambiato e ridisegna le carte a schermo nella nuova posizione. Questo previene il temuto "Spaghetti Code" (codice intrecciato in cui grafica e logica sono un pasticcio unico).</p>
 <h3 id="lo-state-pattern-macchina-a-stati">Lo State Pattern (Macchina a Stati)</h3>
@@ -251,6 +282,76 @@ Usiamo lo <strong>State Pattern</strong>.
 - Abbiamo un "Direttore", chiamato <code>SceneManager</code>. Lui possiede un "Palcoscenico" (un puntatore <code>std::unique_ptr&lt;Scene&gt; currentScene</code>).
 - Tutte le schermate (<code>MenuScene</code>, <code>LobbyScene</code>, <code>GameScene</code>) sono "Attori" che ereditano da un'interfaccia base chiamata <code>Scene</code>.
 - Quando sei nel menu e clicchi "Gioca", la <code>MenuScene</code> urla al Direttore: "Cambia Scena in GameScene!". Il Direttore <em>distrugge</em> letteralmente l'attore Menu dalla memoria RAM e crea al suo posto l'attore GameScene, cedendogli il controllo degli input del mouse. In questo modo solo una schermata per volta occupa la memoria e il processore.</p>
+<h3 id="diagramma-delle-classi-uml">Diagramma delle Classi UML</h3>
+<p>Ecco la mappa stellare di come tutte queste entità si incastrano tra loro a livello di codice:</p>
+<pre><code class="language-mermaid">classDiagram
+    class SceneManager {
+        -unique_ptr~Scene~ currentScene
+        +changeScene()
+        +update()
+        +render()
+    }
+
+    class Scene {
+        &lt;&lt;interface&gt;&gt;
+        +handleInput()*
+        +update()*
+        +render()*
+    }
+
+    class MenuScene
+    class GameScene
+    class LobbyScene
+
+    SceneManager *-- Scene : gestisce
+    Scene &lt;|-- MenuScene
+    Scene &lt;|-- GameScene
+    Scene &lt;|-- LobbyScene
+
+    class Partita {
+        -Mazzo mazzo
+        -vector~Giocatore~ giocatori
+        -bool latoOscuroAttivo
+        +mossaValida()
+        +mossaBot()
+        +applicaEffettoCarta()
+    }
+
+    class Mazzo {
+        -vector~Carta~ carteDaPescare
+        -vector~Carta~ carteScartate
+        +mescola()
+        +pesca()
+    }
+
+    class Giocatore {
+        -vector~Carta~ mano
+        -string nome
+        +pescaCarta()
+        +giocaCarta()
+    }
+
+    class Carta {
+        -Colore coloreChiaro
+        -Valore valoreChiaro
+        -Colore coloreOscuro
+        +getColore()
+        +getValore()
+    }
+
+    class GestoreRete {
+        -TcpSocket socket
+        +setBlocking(false)
+        +riceviMessaggio()
+    }
+
+    GameScene *-- Partita : contiene
+    GameScene *-- GestoreRete : comunica con
+    Partita *-- Mazzo : possiede
+    Partita *-- Giocatore : gestisce
+    Mazzo o-- Carta : aggrega
+    Giocatore o-- Carta : ha in mano
+</code></pre></div>
 <hr />
 <h2 id="capitolo-3-anatomia-del-codice-logico-il-modello">CAPITOLO 3: ANATOMIA DEL CODICE LOGICO (Il Modello)</h2>
 <p>Andiamo a smontare ogni singolo file che gestisce le regole.</p>
@@ -298,6 +399,7 @@ Come fa il gioco a sapere se puoi buttare una carta?</p>
     return false;
 }
 </code></pre></div>
+<p><img alt="Sfondo Tavolo Gioco" src="table_bg.png" /></p>
 <h3 id="4-databaseh-e-databasecpp">4. <code>Database.h</code> e <code>Database.cpp</code></h3>
 <p><strong>Significato:</strong> Gestisce la memoria a lungo termine (Classifica).
 - Usa le librerie base di sistema C++ (<code>&lt;fstream&gt;</code>) per aprire un file <code>.csv</code> sul disco fisso.
