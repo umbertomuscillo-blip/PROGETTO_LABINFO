@@ -275,6 +275,7 @@
 <li><a href="#bug-1-il-paradosso-di-mac-vs-windows-in-multiplayer">BUG #1: Il Paradosso di Mac vs Windows in Multiplayer</a></li>
 <li><a href="#bug-2-la-pesca-infinita-e-la-paralisi-del-turno">BUG #2: La Pesca Infinita e la Paralisi del Turno</a></li>
 <li><a href="#bug-3-il-letale-jolly-grigio-sotto-al-flip">BUG #3: Il Letale "Jolly Grigio" sotto al Flip</a></li>
+<li><a href="#bug-4-la-sindrome-da-retina-display-bug-del-mouse-su-mac">BUG #4: La Sindrome da Retina Display (Bug del Mouse su Mac)</a></li>
 </ul>
 </li>
 <li><a href="#capitolo-7-motore-grafico-e-animazioni-sfml-avanzato">CAPITOLO 7: MOTORE GRAFICO E ANIMAZIONI (SFML AVANZATO)</a><ul>
@@ -282,6 +283,9 @@
 <li><a href="#2-le-animazioni-fisiche-delle-carte">2. Le Animazioni Fisiche delle Carte</a></li>
 <li><a href="#3-animazioni-dei-testi-il-gigantesco-uno">3. Animazioni dei Testi: Il gigantesco "UNO!"</a></li>
 <li><a href="#4-texture-e-sprite-come-si-caricano-le-immagini">4. Texture e Sprite (Come si caricano le immagini?)</a></li>
+<li><a href="#5-costruzione-vettoriale-della-singola-carta">5. Costruzione Vettoriale della Singola Carta</a></li>
+<li><a href="#6-layout-del-tavolo-e-avversari">6. Layout del Tavolo e Avversari</a></li>
+<li><a href="#7-la-logica-dei-bottoni-interattivi-uiutilscpp">7. La logica dei Bottoni Interattivi (UIUtils.cpp)</a></li>
 </ul>
 </li>
 <li><a href="#curiosita-e-aneddoti-di-sviluppo">CURIOSITÀ E ANEDDOTI DI SVILUPPO</a></li>
@@ -548,6 +552,16 @@ if (nuovoColore == NERO) {
 }
 </code></pre></div>
 <p>Il sistema ora percepisce la singolarità del Jolly, lo annulla e fa "rollare" al computer un dado invisibile a 4 facce per inventarsi un colore legale, salvando la partita dal congelamento.</p>
+<h3 id="bug-4-la-sindrome-da-retina-display-bug-del-mouse-su-mac">BUG #4: La Sindrome da Retina Display (Bug del Mouse su Mac)</h3>
+<p><strong>Il problema:</strong> Su Windows i bottoni funzionavano a meraviglia, l'hover si accendeva e il click rispondeva. Su Mac, invece, cliccare un bottone non faceva assolutamente nulla, a meno di non cliccare <em>molto più in basso e a destra</em> rispetto alla grafica del bottone reale. Le coordinate erano sfasate.
+<strong>L'Indagine:</strong> L'errore risiedeva nella funzione <code>sf::Mouse::getPosition(window)</code>. I moderni schermi Apple "Retina" raddoppiano il numero di pixel fisici per rendere tutto nitidissimo. Se la nostra finestra logica era di <code>1024x768</code>, il Mac disegnava fisicamente una finestra di <code>2048x1536</code>. La funzione <code>getPosition</code> leggeva le coordinate fisiche (es: <code>x=2000</code>), ma il gioco controllava il rettangolo del bottone nelle coordinate logiche (massimo <code>1024</code>).
+<strong>La Soluzione:</strong>
+SFML ha una funzione dedicata proprio per mappare lo spazio fisico sullo spazio logico 2D (chiamato World Coordinate). Abbiamo corretto tutti i nostri file (<code>MenuScene</code>, <code>GameScene</code>, ecc.) aggiungendo questa conversione:</p>
+<div class="code-wrapper"><pre><code class="language-cpp">sf::Vector2i pixelPos = sf::Mouse::getPosition(window); // Legge il pixel fisico dal monitor
+sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos); // FIX: Converte il pixel nella coordinata logica del gioco (1024x768)
+
+if (btnMulti.cliccato(mousePos)) { // Ora l'intersezione matematica funziona ovunque!
+</code></pre></div>
 <hr />
 <h2 id="capitolo-7-motore-grafico-e-animazioni-sfml-avanzato">CAPITOLO 7: MOTORE GRAFICO E ANIMAZIONI (SFML AVANZATO)</h2>
 <p>Un gioco non è nulla senza una veste grafica accattivante. A differenza di Unity o Unreal Engine (dove sposti oggetti con il mouse), in <strong>SFML</strong> tutto ciò che vedi sullo schermo è disegnato matematicamente, pixel per pixel, tramite codice C++. 
@@ -589,6 +603,28 @@ testoAnimazioneUno.setFillColor(sf::Color(255, 255, 0, alpha));
 In SFML caricare l'immagine 60 volte al secondo ucciderebbe il computer. Per questo si usano le <strong>Texture</strong> e gli <strong>Sprite</strong>:
 - La <strong><code>sf::Texture</code></strong> è l'immagine pesante vera e propria (<code>card_back.png</code>) che viene caricata dalla memoria del disco rigido alla velocissima VRAM della Scheda Video <strong>una sola volta</strong> all'avvio del programma.
 - Lo <strong><code>sf::Sprite</code></strong> è invece una specie di "pellicola di plastica" leggerissima su cui "spalmiamo" la texture. Possiamo creare 100 sprite diversi (100 carte in mano) che pescano tutti dalla stessa singola Texture, ruotandoli e spostandoli senza appesantire la memoria!</p>
+<h3 id="5-costruzione-vettoriale-della-singola-carta">5. Costruzione Vettoriale della Singola Carta</h3>
+<p>Sarebbe stato facile scaricare da Google 108 immagini <code>.png</code>, una per ogni carta di UNO, e stamparle a schermo. Ma non l'abbiamo fatto. A parte il dorso delle carte (<code>card_back.png</code>), <strong>tutte le facciate chiare e oscure sono disegnate vettorialmente tramite codice</strong>.
+Nella funzione <code>disegnaCartaFronte()</code> in <code>GameScene.cpp</code>, assembliamo fisicamente i pezzi per comporre la carta al volo:
+1. Creiamo il corpo base: un <code>sf::RectangleShape</code> (Rettangolo) di dimensioni <code>70x100</code>.
+2. Usiamo una libreria (o un trucco grafico) per smussarne gli angoli (arrotondamento).
+3. Gli diamo un colore tramite <code>.setFillColor()</code> in base alle proprietà del <em>Modello</em> (<code>Carta::getColore()</code>).
+4. Sovrapponiamo un cerchio al centro: <code>sf::CircleShape</code>, schiacciandolo leggermente per renderlo ovale se necessario.
+5. Ci stampiamo sopra due testi (<code>sf::Text</code>), uno grande al centro e uno piccolo in alto a sinistra (o in basso a destra usando <code>.setOrigin</code>).
+Questo approccio rende il gioco estremamente leggero, scalabile a qualsiasi risoluzione senza sgranare mai, e ha evitato il caricamento di decine di MegaByte di texture esterne.</p>
+<h3 id="6-layout-del-tavolo-e-avversari">6. Layout del Tavolo e Avversari</h3>
+<p>Disegnare la propria mano è facile (basta allineare le carte in basso allo schermo modificando dinamicamente la spaziatura asse X). Ma come disegniamo gli avversari?
+Gli altri 3 giocatori sono disposti in alto, a sinistra e a destra del tavolo. Il codice itera sulle mani degli avversari e stampa tanti dorsi (<code>disegnaCartaDorso</code>) quante sono le loro carte.
+Per i giocatori laterali, applichiamo una rotazione hardware usando il metodo:</p>
+<div class="code-wrapper"><pre><code class="language-cpp">dorsoSprite.setRotation(90.f); // Ruota la pellicola dell'immagine di 90 gradi!
+</code></pre></div>
+<p>Per la Pila degli Scarti, invece, invochiamo semplicemente la stampa della faccia (<code>disegnaCartaFronte</code>) passando come <code>X</code> e <code>Y</code> il centro esatto della nostra finestra (es. <code>512, 384</code>).</p>
+<h3 id="7-la-logica-dei-bottoni-interattivi-uiutilscpp">7. La logica dei Bottoni Interattivi (<code>UIUtils.cpp</code>)</h3>
+<p>I bottoni del nostro gioco non sono immagini scaricate da internet. C'è un'intera struttura chiamata <code>Button</code> creata da noi. 
+Un <code>Button</code> è essenzialmente un <code>sf::RectangleShape</code> che contiene una stringa di testo.
+Per renderlo <em>vivo e interattivo</em> sfrutta due metodi:
+- <strong><code>cliccato(mousePos)</code></strong>: Fa un rapido controllo matematico (chiamato Axis-Aligned Bounding Box Collision) per verificare se il puntino X,Y del mouse si trova "dentro" il rettangolo del bottone <code>rect.getGlobalBounds().contains(mousePos)</code>.
+- <strong><code>aggiorna(mousePos)</code> (L'Hover State)</strong>: Ad ogni singolo frame (60 volte al secondo), il bottone esegue questo test. Se il mouse è "sopra" di esso, il bottone altera il suo attributo di colore trasformandosi in una tonalità più chiara o scura (<code>hoverColor</code>), dando così l'illusione visiva di essere selezionato!</p>
 <hr />
 <h2 id="curiosita-e-aneddoti-di-sviluppo">CURIOSITÀ E ANEDDOTI DI SVILUPPO</h2>
 <ul>
