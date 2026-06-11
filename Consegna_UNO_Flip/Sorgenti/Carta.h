@@ -1,0 +1,79 @@
+// Carta.h
+// Definizione della classe Carta e delle enumerazioni di base (Colore, Valore).
+// Questo file rappresenta la struttura fondamentale di una carta di UNO Flip,
+// caratterizzata dal possedere due facce giocabili (Lato Chiaro e Lato Oscuro).
+
+#ifndef CARTA_H
+#define CARTA_H
+
+#include <string>
+
+// Valori per Colore
+// Rappresenta tutti i colori possibili assumibili da una carta.
+// Include i 4 colori classici (Lato Chiaro), i 4 colori alternativi (Lato Oscuro)
+// e un colore neutro (NERO) riservato alle carte Jolly.
+enum Colore { 
+    ROSSO, GIALLO, VERDE, BLU,           // Colori Lato Chiaro
+    ROSA, VERDE_ACQUA, ARANCIONE, VIOLA, // Colori Lato Oscuro
+    NERO                                 // Colore neutro iniziale per le carte speciali (Jolly)
+};
+
+// Valori per Valore
+// Rappresenta tutti i numeri e i poteri speciali delle carte.
+// Nota di Game Design: Nel gioco "UNO Flip!" originale non esiste la carta numero ZERO.
+enum Valore { 
+    UNO, DUE, TRE, QUATTRO, CINQUE, SEI, SETTE, OTTO, NOVE, 
+    SALTA,               // Lato Chiaro: Salta il turno del giocatore successivo
+    SALTA_TUTTI,         // Lato Oscuro: Salta il turno di tutti gli altri giocatori
+    INVERTI,             // Entrambi i lati: Inverte il senso di gioco
+    FLIP,                // Entrambi i lati: La carta chiave che capovolge il mazzo e le mani
+    PESCA_UNO,           // Lato Chiaro: Fa pescare 1 carta al successivo
+    PESCA_CINQUE,        // Lato Oscuro: Fa pescare 5 carte al successivo
+    JOLLY,               // Entrambi i lati: Permette di cambiare il colore attivo
+    JOLLY_PESCA_DUE,     // Lato Chiaro: Cambia colore e fa pescare 2 carte
+    JOLLY_PESCA_COLORE   // Lato Oscuro: Cambia colore e fa pescare carte finché non esce il colore scelto
+};
+
+// Classe Carta
+// Modella una singola carta fisica del gioco UNO Flip.
+// Ogni istanza di questa classe memorizza permanentemente le informazioni
+// per entrambe le sue facce. In questo modo, quando si verifica un FLIP,
+// la carta mantiene coerente la propria identità.
+class Carta {
+private:
+    // --- Attributi Lato Chiaro ---
+    Colore coloreChiaro;
+    Valore valoreChiaro;
+    
+    // --- Attributi Lato Oscuro ---
+    Colore coloreOscuro;
+    Valore valoreOscuro;
+
+public:
+    // Costruttore della Carta.
+// Parametro: cChiaro Colore della faccia chiara.
+// Parametro: vChiaro Valore/Effetto della faccia chiara.
+// Parametro: cOscuro Colore della faccia oscura.
+// Parametro: vOscuro Valore/Effetto della faccia oscura.
+    Carta(Colore cChiaro, Valore vChiaro, Colore cOscuro, Valore vOscuro);
+
+    // Restituisce la descrizione formattata per la stampa (Lato Chiaro).
+// Ritorna: Stringa nel formato "Valore Colore" (es. "7 Verde").
+    std::string getDescrizioneChiara();
+
+    // Restituisce la descrizione formattata per la stampa (Lato Oscuro).
+// Ritorna: Stringa nel formato "Valore Colore" (es. "Pesca Cinque Rosa").
+    std::string getDescrizioneOscura();
+
+    // Interroga la carta per conoscerne il colore attualmente giocabile.
+// Parametro: latoOscuro Booleano globale della Partita (true se il gioco è capovolto).
+// Ritorna: Il colore della faccia attualmente visibile.
+    Colore getColore(bool latoOscuro);
+
+    // Interroga la carta per conoscerne il valore/potere attualmente giocabile.
+// Parametro: latoOscuro Booleano globale della Partita (true se il gioco è capovolto).
+// Ritorna: Il valore della faccia attualmente visibile.
+    Valore getValore(bool latoOscuro);
+};
+
+#endif

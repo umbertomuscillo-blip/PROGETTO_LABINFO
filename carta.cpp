@@ -1,10 +1,8 @@
 #include "Carta.h"
 
-/**
- * @brief Costruttore della classe Carta.
- * Inizializza una carta con i parametri per entrambi i lati (Chiaro e Oscuro).
- * Questa struttura a 4 attributi è fondamentale per implementare la meccanica "Flip" del gioco.
- */
+// Costruttore della classe Carta.
+// Inizializza una carta con i parametri per entrambi i lati (Chiaro e Oscuro).
+// Questa struttura a 4 attributi è fondamentale per implementare la meccanica "Flip" del gioco.
 Carta::Carta(Colore cChiaro, Valore vChiaro, Colore cOscuro, Valore vOscuro) {
     coloreChiaro = cChiaro;
     valoreChiaro = vChiaro;
@@ -18,10 +16,8 @@ Carta::Carta(Colore cChiaro, Valore vChiaro, Colore cOscuro, Valore vOscuro) {
 // internamente a questo file per tradurre i tipi Enum in stringhe leggibili.
 // ==============================================================================
 
-/**
- * @brief Traduce l'enumerazione Colore in una stringa di testo.
- * Utile per l'interfaccia grafica e per la stampa a terminale.
- */
+// Traduce l'enumerazione Colore in una stringa di testo.
+// Utile per l'interfaccia grafica e per la stampa a terminale.
 std::string coloreToString(Colore c) {
     switch(c) {
         case ROSSO: return "Rosso";
@@ -37,9 +33,7 @@ std::string coloreToString(Colore c) {
     }
 }
 
-/**
- * @brief Traduce l'enumerazione Valore in una stringa di testo.
- */
+// Traduce l'enumerazione Valore in una stringa di testo.
 std::string valoreToString(Valore v) {
     switch(v) {
         case UNO: return "1"; case DUE: return "2"; case TRE: return "3";
@@ -62,37 +56,29 @@ std::string valoreToString(Valore v) {
 // METODI PUBBLICI DELLA CLASSE CARTA
 // ==============================================================================
 
-/**
- * @brief Restituisce il nome completo della carta per il Lato Chiaro (es. "7 Rosso").
- */
+// Restituisce il nome completo della carta per il Lato Chiaro (es. "7 Rosso").
 std::string Carta::getDescrizioneChiara() {
     // Concatena il valore e il colore convertiti in stringa
     return valoreToString(valoreChiaro) + " " + coloreToString(coloreChiaro);
 }
 
-/**
- * @brief Restituisce il nome completo della carta per il Lato Oscuro (es. "Pesca Cinque Viola").
- */
+// Restituisce il nome completo della carta per il Lato Oscuro (es. "Pesca Cinque Viola").
 std::string Carta::getDescrizioneOscura() {
     return valoreToString(valoreOscuro) + " " + coloreToString(coloreOscuro);
 }
 
-/**
- * @brief Getter per il Colore della carta in base allo stato attuale della partita.
- * @param latoOscuro Booleano che indica se il tavolo è attualmente girato sul lato oscuro.
- * @return Il colore corrispondente alla faccia visibile.
- */
+// Getter per il Colore della carta in base allo stato attuale della partita.
+// Parametro: latoOscuro Booleano che indica se il tavolo è attualmente girato sul lato oscuro.
+// Ritorna: Il colore corrispondente alla faccia visibile.
 Colore Carta::getColore(bool latoOscuro) {
     // Utilizzo dell'operatore ternario (condizione ? se_vero : se_falso)
     // È una forma compatta e molto elegante per evitare un costrutto if-else
     return latoOscuro ? coloreOscuro : coloreChiaro; 
 }
 
-/**
- * @brief Getter per il Valore della carta in base allo stato attuale della partita.
- * @param latoOscuro Booleano che indica se il tavolo è attualmente girato sul lato oscuro.
- * @return Il valore corrispondente alla faccia visibile.
- */
+// Getter per il Valore della carta in base allo stato attuale della partita.
+// Parametro: latoOscuro Booleano che indica se il tavolo è attualmente girato sul lato oscuro.
+// Ritorna: Il valore corrispondente alla faccia visibile.
 Valore Carta::getValore(bool latoOscuro) {
     return latoOscuro ? valoreOscuro : valoreChiaro; 
 }

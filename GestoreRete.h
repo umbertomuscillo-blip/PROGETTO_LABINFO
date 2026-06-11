@@ -1,7 +1,5 @@
-/**
- * @file GestoreRete.h
- * @brief Classi per gestire il Multiplayer tramite SFML Network
- */
+// GestoreRete.h
+// Classi per gestire il Multiplayer tramite SFML Network
 
 #ifndef GESTORERETE_H
 #define GESTORERETE_H

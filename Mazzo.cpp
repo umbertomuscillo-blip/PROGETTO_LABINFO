@@ -1,9 +1,7 @@
-/**
- * @file Mazzo.cpp
- * @brief Implementazione della classe Mazzo.
- * Gestisce l'algoritmo di generazione delle carte a doppia faccia (Flip), 
- * il mescolamento e le dinamiche di estrazione (pesca/scarto).
- */
+// Mazzo.cpp
+// Implementazione della classe Mazzo.
+// Gestisce l'algoritmo di generazione delle carte a doppia faccia (Flip),
+// il mescolamento e le dinamiche di estrazione (pesca/scarto).
 
 #include "Mazzo.h"
 #include <iostream>
@@ -22,26 +20,20 @@ uint32_t Mazzo::ottieniNumeroCasuale() {
 }
 
 
-/**
- * @brief Costruttore del Mazzo. 
- * Invoca immediatamente la funzione di inizializzazione per preparare le carte.
- */
+// Costruttore del Mazzo.
+// Invoca immediatamente la funzione di inizializzazione per preparare le carte.
 Mazzo::Mazzo() {
     inizializzaMazzo();
 }
 
-/**
- * @struct MezzaCarta
- * @brief Struttura dati temporanea usata ESCLUSIVAMENTE durante la generazione del mazzo.
- */
+// MezzaCarta
+// Struttura dati temporanea usata ESCLUSIVAMENTE durante la generazione del mazzo.
 struct MezzaCarta {
     Colore c;
     Valore v;
 };
 
-/**
- * @brief Genera l'intero mazzo di 112 carte di UNO Flip.
- */
+// Genera l'intero mazzo di 112 carte di UNO Flip.
 void Mazzo::inizializzaMazzo() {
     carteDaPescare.clear();
     carteScartate.clear();
@@ -99,9 +91,7 @@ void Mazzo::inizializzaMazzo() {
     }
 }
 
-/**
- * @brief Mescola l'intero mazzo finito (Le carte già incollate).
- */
+// Mescola l'intero mazzo finito (Le carte già incollate).
 void Mazzo::mescola() {
     // Usiamo il nostro generatore custom per lo shuffle, per evitare che 
     // std::shuffle produca risultati diversi tra libc++ (Mac) e libstdc++ (Windows).
@@ -111,25 +101,19 @@ void Mazzo::mescola() {
     }
 }
 
-/**
- * @brief Getter per conoscere quante carte ci sono ancora nel mazzo.
- */
+// Getter per conoscere quante carte ci sono ancora nel mazzo.
 int Mazzo::carteRimanenti() {
     return carteDaPescare.size();
 }
 
-/**
- * @brief Estrae la carta in cima al mazzo per darla a un giocatore.
- */
+// Estrae la carta in cima al mazzo per darla a un giocatore.
 Carta Mazzo::pesca() {
     Carta pescata = carteDaPescare.back(); 
     carteDaPescare.pop_back();             
     return pescata;
 }
 
-/**
- * @brief Aggiunge una carta alla pila degli scarti sul tavolo.
- */
+// Aggiunge una carta alla pila degli scarti sul tavolo.
 void Mazzo::scarta(Carta c) {
     carteScartate.push_back(c);
 }

@@ -1,87 +1,23 @@
-# PROGETTO_LABINFO
-🃏 Progetto Laboratorio di Informatica: UNO Flip! (Edizione 30 e Lode)
+progetto labinfo - uno flip
+fatto da umberto e fabio
 
-Questo repository contiene il caso di studio "UNO" esteso con le regole ufficiali di "UNO Flip".
-Il progetto è stato sviluppato per soddisfare i requisiti avanzati del corso, includendo logica Object-Oriented in C++, Interfaccia Grafica 2D (SFML), Intelligenza Artificiale, salvataggio persistente su Database e architettura di Rete Client-Server.
+questo e' il nostro progetto per l'esame di lab. abbiamo rifatto uno flip da zero in c++, ci sta la grafica, il multiplayer e pure un bot per giocare da soli.
 
----
+come farlo partire:
+- se hai il mac: apri il terminale, vai nella cartella Sorgenti e scrivi ./avvia.sh
+(se ti da errore di permessi scrivi prima chmod +x avvia.sh e poi riprova)
+- se hai windows: apri la cartella Eseguibili, estrai lo zip unoflip_windows_definitivo.zip e fai doppio click su unoflip.exe. non serve installare nient'altro.
 
-## 🌳 Architettura del Software (Pattern MVC)
+come giocare in multiplayer:
+uno deve fare da server (ospita partita) e aspettare. vi dira' un ip tipo 192.168...
+l'altro clicca su connettiti e mette quell'ip li. fatelo sulla stessa rete wifi o con l'hotspot e siete a posto.
 
-Il codice è stato progettato applicando rigorosamente il Design Pattern **Model-View-Controller (MVC)** e il principio dell'**Incapsulamento**. La logica pura del gioco è totalmente disaccoppiata dall'interfaccia visiva.
+note per il prof sul codice:
+abbiamo diviso tutto con il pattern mvc per separare la grafica dalla logica. per la grafica abbiamo usato sfml 3. 
+per il multiplayer abbiamo usato i socket tcp non bloccanti cosi il gioco non lagga mentre aspetta i dati.
+c'e' stato un bordello per far mischiare le carte allo stesso modo su mac e windows in multiplayer, quindi abbiamo scritto una funzione nostra per i numeri casuali basata sul seed iniziale cosi sono per forza uguali.
+per i salvataggi leggiamo e scriviamo su dei file txt e csv (la classifica). 
 
-Di seguito il diagramma a blocchi delle dipendenze:
+i file sono tutti commentati cosi si capisce cosa fanno le classi (Carta, Mazzo, Partita, GestoreRete ecc).
 
-```mermaid
-graph TD
-    subgraph Base ["1. ENTITÀ DI BASE (Model)"]
-        C(Carta <br/> Lato Chiaro/Oscuro)
-        M(Mazzo <br/> Genera e Mescola)
-        G(Giocatore <br/> Gestisce la Mano)
-    end
-
-    subgraph Motore ["2. MOTORE DEL GIOCO (Controller)"]
-        P{Partita <br/> Direttore d'orchestra}
-        P -->|Controlla| M
-        P -->|Gestisce i turni di| G
-    end
-
-    subgraph Architettura ["3. ARCHITETTURA AVANZATA (View & Rete)"]
-        DB[(Database CSV <br/> Salva Statistiche)]
-        S[Server Socket <br/> Valida la logica]
-        CL([Client SFML <br/> Interfaccia Grafica])
-        GB(Bot IA <br/> Intelligenza Artificiale)
-        
-        CL <-->|Invia Mosse / Riceve Dati| S
-        S <-->|Salva/Carica| DB
-        S -->|Gestisce| P
-        P -->|Innesca| GB
-    end
-
-
-🚀 Milestone di Sviluppo
-[x] 1. Logica di base Carta e Mazzo: Generazione, mescolamento e doppia faccia.
-
-[x] 2. Logica Giocatore: Gestione memoria dinamica (std::vector) della mano.
-
-[x] 3. Controller Partita: Applicazione millimetrica del regolamento ufficiale.
-
-[x] 4. Interfaccia Grafica (GUI): Integrazione completa libreria SFML 3.
-
-[x] 5. Integrazione DBMS: Salvataggio e lettura persistente delle statistiche.
-
-[x] 6. Intelligenza Artificiale: Bot autonomo integrato nel Game Loop.
-
-[x] 7. Rete Client-Server: Socket TCP non bloccanti per multiplayer LAN multi-piattaforma (Mac/Windows).
-
-✨ Funzionalità Tecniche Implementate (Current Build)
-Attualmente il gioco è un'applicazione desktop completa, robusta e responsiva.
-
-⚙️ Motore di Gioco (Core Engine)
-
-Generazione Dinamica: 112 carte generate assemblando casualmente "Mezze Carte" chiare e oscure, garantendo combinazioni fronte/retro uniche ad ogni nuova partita.
-
-Eccezioni Ufficiali 1vs1: Le carte "Inverti" e "Salta" sono calcolate matematicamente per bloccare il turno dell'avversario nelle partite a 2 giocatori.
-
-Validazione Assoluta: Il sistema impedisce mosse illegali, riconoscendo colori, numeri e applicando automaticamente le penitenze (+1, +5, Pesca Colore).
-
-🖥️ Grafica e UI (SFML)
-
-Macchina a Stati (FSM): Gestione fluida delle transizioni tra Menu Principale, Game Loop e Schermata di Fine Partita (senza memory leaks tramite allocazione/deallocazione dinamica della Partita).
-
-Letterboxing e Resize: Adattamento automatico della telecamera (sf::View) in caso di ridimensionamento della finestra, mantenendo intatto l'aspect ratio e la precisione dei click del mouse.
-
-Collision Detection Adattiva: Algoritmo matematico per l'overlapping delle carte in mano. Se il giocatore accumula troppe carte, l'interfaccia le sovrappone verso il centro calcolando il click in base allo Z-Index visivo (cliccando sempre la carta in cima).
-
-Meccanica "UNO!": Implementato un pulsante a schermo. Se il giocatore gioca la penultima carta senza prima aver premuto "UNO!", il motore gli infligge dinamicamente 2 carte di penalità.
-
-🧠 IA e Persistenza Dati
-
-Bot Greedy: L'avversario CPU analizza la propria mano ed esegue mosse valide (inclusa la scelta strategica del colore sui Jolly) simulando un tempo di pensiero umano (Delay Timer).
-
-Database (CSV): Utilizzo della libreria fstream (ifstream/ofstream e stringstream) per caricare lo storico vittorie all'avvio e aggiornare il database locale a partita conclusa.
-
-🌐 Rete e Multiplayer (TCP)
-
-Sincronizzazione Deterministica: Per garantire la compatibilità cross-platform tra architetture diverse (Mac/Windows) è stato sviluppato un generatore di numeri pseudo-casuali (LCG) custom. Questo assicura che il mescolamento dei mazzi generi l'esatta identica sequenza di carte su tutti i client a partire da un seme condiviso.
-Socket Non-Bloccanti: Implementazione di connessioni TCP asincrone (SFML Network) per non freezare il framerate del gioco durante l'attesa di ricezione dei pacchetti.
+buon divertimento!

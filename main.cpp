@@ -1,9 +1,7 @@
-/**
- * @file main.cpp
- * @brief Punto di ingresso per la versione testuale/console del gioco.
- * Utile per il debugging rapido della logica di base (Partita, Carte, Database)
- * senza dover caricare le librerie grafiche SFML.
- */
+// main.cpp
+// Punto di ingresso per la versione testuale/console del gioco.
+// Utile per il debugging rapido della logica di base (Partita, Carte, Database)
+// senza dover caricare le librerie grafiche SFML.
 
 #include <iostream>
 #include <vector>

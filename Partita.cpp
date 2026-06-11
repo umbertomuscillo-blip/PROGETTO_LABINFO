@@ -1,7 +1,5 @@
-/**
- * @file Partita.cpp
- * @brief Implementazione della logica di gioco di UNO Flip.
- */
+// Partita.cpp
+// Implementazione della logica di gioco di UNO Flip.
 
 #include "Partita.h"
 #include "SoundManager.h"

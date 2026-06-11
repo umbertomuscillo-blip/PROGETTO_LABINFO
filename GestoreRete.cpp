@@ -1,7 +1,5 @@
-/**
- * @file GestoreRete.cpp
- * @brief Implementazione dei socket NON bloccanti.
- */
+// GestoreRete.cpp
+// Implementazione dei socket NON bloccanti.
 
 #include "GestoreRete.h"
 #include <iostream>

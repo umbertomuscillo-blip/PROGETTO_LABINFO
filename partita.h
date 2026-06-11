@@ -1,7 +1,5 @@
-/**
- * @file Partita.h
- * @brief Definizione della classe Partita.
- */
+// Partita.h
+// Definizione della classe Partita.
 
 #ifndef PARTITA_H
 #define PARTITA_H
