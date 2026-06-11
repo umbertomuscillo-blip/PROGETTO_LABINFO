@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Bibbia di UNO Flip!</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code&display=swap" rel="stylesheet">
+    <!-- Include Mermaid.js per i flowchart -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
     <style>
         :root {
             --bg-grad-1: #0f172a;
@@ -141,9 +146,6 @@
         tr:last-child td {
             border-bottom: none;
         }
-
-        /* Hover effect on paragraphs and list items */
-        li { margin-bottom: 10px; }
         
         hr {
             border: 0;
@@ -157,6 +159,13 @@
             .container { margin: 20px; padding: 20px; }
             h1 { font-size: 2.2rem; }
             h2 { font-size: 1.6rem; }
+        }
+        
+        .mermaid {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
     </style>
 </head>
@@ -271,6 +280,13 @@
       // per riavviare la giocabilità.
   }</code>
   In questo modo il gioco si sblocca autonomamente assegnando magicamente un colore randomico coerente col lato attuale.</li>
+</ul>
+<hr />
+<h2 id="curiosita-e-aneddoti-di-sviluppo">CURIOSITÀ E ANEDDOTI DI SVILUPPO</h2>
+<ul>
+<li><strong>Il Design dei Suoni</strong>: Tutti gli effetti audio (<code>.wav</code>) sono gestiti pre-caricando i buffer in RAM all'inizio della partita. Lo sapevi che quando si gioca una carta molto "cattiva" (come il +5 Oscuro) il sistema usa lo stesso <code>SoundManager</code> ma la gravità percepita dai giocatori cambia totalmente l'atmosfera?</li>
+<li><strong>60 FPS Limitati</strong>: A un certo punto dello sviluppo abbiamo dovuto limitare esplicitamente il framerate (<code>setFramerateLimit(60)</code>), perché altrimenti nei PC molto potenti la ventola impazziva disegnando il tavolo a 4000 FPS!</li>
+<li><strong>L'origine di UNO Flip</strong>: Rispetto all'UNO classico, il Flip richiede il doppio dei controlli della logica. Inizialmente volevamo implementare due mazzi separati, ma poi abbiamo capito che <em>la carta fisica è letteralmente una sola</em> che ha due facce, ed è nato il design a doppia faccia della classe <code>Carta</code>!</li>
 </ul>
 <hr />
 <p><em>Fine del Documento. Sezione creata interamente in via procedurale a scopo di ripasso.</em></p>
