@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Bibbia di UNO Flip!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.5);
+            --code-bg: #020617;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+            color: var(--text-main);
+            line-height: 1.7;
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 800;
+            margin-top: 2em;
+            margin-bottom: 0.5em;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 0;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: #e2e8f0;
+        }
+
+        p, li {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        a:hover {
+            color: #bae6fd;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #fca5a5;
+        }
+
+        pre {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: #a7f3d0;
+        }
+
+        blockquote {
+            border-left: 4px solid var(--accent);
+            background: rgba(56, 189, 248, 0.05);
+            margin: 0;
+            padding: 10px 20px;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(0,0,0,0.4);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Hover effect on paragraphs and list items */
+        li { margin-bottom: 10px; }
+        
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border);
+            margin: 40px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { margin: 20px; padding: 20px; }
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="la-bibbia-di-uno-flip-c">LA BIBBIA DI UNO FLIP! (C++)</h1>
+<p><strong>Manuale Tecnico Completo, Guida di Studio e Diario di Sviluppo</strong></p>
+<hr />
+<h2 id="introduzione-al-sistema">INTRODUZIONE AL SISTEMA</h2>
+<p>Il nostro progetto "UNO Flip!" in C++ è molto più di un semplice gioco da tavolo digitale. È un ecosistema complesso suddiviso rigorosamente secondo il <strong>Pattern MVC (Model-View-Controller)</strong> e lo <strong>State Pattern</strong>. Questo garantisce che la logica del gioco (che calcola i turni e le regole) non sappia assolutamente nulla di come i bottoni vengano disegnati a schermo o di come i pacchetti viaggino su internet.</p>
+<h3 id="come-funziona-interamente-flusso-logico-globale">Come funziona interamente (Flusso Logico Globale)</h3>
+<ol>
+<li><strong>L'Avvio (<code>main.cpp</code> e <code>Main_grafico.cpp</code>)</strong>: Il <code>main()</code> istanzia la finestra <code>sf::RenderWindow</code> (SFML) e inizializza il <strong><code>SceneManager</code></strong>. Da questo momento, il ciclo <code>while (window.isOpen())</code> prende il controllo, calcolando il tempo trascorso (<code>deltaTime</code>) e smistando Eventi, Aggiornamenti grafici e Rendering alla "Scena" attualmente attiva.</li>
+<li><strong>Navigazione (State Pattern)</strong>: Ogni schermata (<code>LoginScene</code>, <code>MenuScene</code>, <code>GameScene</code>, ecc.) eredita da <code>Scene</code>. Quando vogliamo cambiare menu, chiamiamo <code>manager-&gt;changeScene(std::make_unique&lt;NuovaScena&gt;())</code>.</li>
+<li><strong>La Partita Inizia (<code>GameScene</code> + <code>Partita</code>)</strong>: Quando si avvia il gioco, <code>GameScene</code> istanzia un oggetto di classe <code>Partita</code>.</li>
+<li><strong><code>GameScene</code> (Vista/Controller)</strong> intercetta i click del mouse.</li>
+<li>Traduce i click (es. "L'utente ha cliccato la terza carta") in chiamate logiche (<code>partita.mossaUmano(2, -1, false)</code>).</li>
+<li><strong><code>Partita</code> (Modello)</strong> elabora la regola, controlla se è valida, cambia il turno e aggiorna lo stato interno.</li>
+<li>Al frame successivo, <code>GameScene</code> legge il nuovo stato (chi è il giocatore di turno, qual è la carta in cima) e lo ridisegna a schermo.</li>
+<li><strong>Il Multiplayer (Rete)</strong>: Se il gioco è multiplayer, il click del mouse non genera solo la mossa locale, ma formatta una stringa (<code>MOSSA;2;0;0</code>) e la invia tramite <strong>Socket TCP non bloccanti</strong> al computer avversario, che esegue <code>mossaRete(...)</code> replicando la logica esattamente in simultanea.</li>
+</ol>
+<hr />
+<h2 id="analisi-di-ogni-singolo-file">ANALISI DI OGNI SINGOLO FILE</h2>
+<p>In questa sezione analizziamo a fondo ogni file sorgente, spiegandone il vero scopo all'interno della macchina del progetto.</p>
+<h3 id="1-il-modello-la-logica-pura">1. IL MODELLO (La Logica Pura)</h3>
+<p><strong><code>Carta.h</code> e <code>carta.cpp</code></strong>
+- <strong>Scopo:</strong> Rappresenta una singola carta fisica con due facce.
+- <strong>Funzionamento:</strong> A differenza dell'UNO classico, qui la carta ha attributi per il "Lato Chiaro" (Colori base, carte normali) e "Lato Oscuro" (Colori strani, effetti devastanti come +5 o Salta Tutti). Memorizza <em>entrambi</em> i lati alla nascita tramite il costruttore.
+- <strong>Metodi chiave:</strong> <code>getColore(bool latoOscuro)</code> e <code>getValore(bool latoOscuro)</code>. A seconda di quale lato del gioco è attualmente attivo globalmente, la carta "mente" su se stessa e rivela solo le statistiche della faccia rivolta verso l'alto.</p>
+<p><strong><code>Mazzo.h</code> e <code>Mazzo.cpp</code></strong>
+- <strong>Scopo:</strong> Fabbrica di carte e gestore delle pile (mazzo di pesca e pila degli scarti).
+- <strong>Funzionamento:</strong> 
+  - <code>inizializzaMazzo()</code> genera 112 carte. Crea vettori per tutte le combinazioni di lati chiari e oscuri, le randomizza e le incolla assieme creando le carte doppie.
+  - Usa una matematica basata sul <strong>Generatore Congruenziale Lineare (LCG)</strong> per assicurare che il mescolamento sia universale (vedi capitolo dei Bug per dettagli!).
+- <strong>Metodi chiave:</strong> <code>pesca()</code> (prende l'ultimo elemento e lo cancella dal mazzo), <code>scarta(Carta c)</code>.</p>
+<p><strong><code>Giocatore.h</code> e <code>Giocatore.cpp</code></strong>
+- <strong>Scopo:</strong> L'entità al tavolo da gioco.
+- <strong>Funzionamento:</strong> Mantiene semplicemente un nome testuale, un flag booleano <code>isBot</code> (per sapere se le sue mani devono essere guidate dal computer) e il vettore dinamico <code>std::vector&lt;Carta&gt; mano</code>.</p>
+<p><strong><code>Partita.h</code> e <code>Partita.cpp</code></strong>
+- <strong>Scopo:</strong> L'arbitro supremo e cuore pulsante della logica.
+- <strong>Funzionamento:</strong> Mantiene l'indice del <code>turnoCorrente</code>, la direzione <code>sensoOrario</code> (booleano invertito dai cambia-giro), e il booleano fondamentale <code>latoOscuroAttivo</code> (invertito dalla carta FLIP).
+- <strong>Controllo Regole (<code>mossaValida</code>)</strong>: Verifica matematicamente se Colore e Valore della carta giocata combaciano col tavolo (o se è nera, Jolly).
+- <strong>Applica Effetto (<code>applicaEffettoCarta</code>)</strong>: Enorme smistatore <code>if-else</code>. Gestisce chi pesca 1, chi pesca 5, chi inverte, e chi decide i colori.
+- <strong>Le Mosse</strong>: Espone <code>mossaUmano</code>, <code>mossaBot</code> e <code>mossaRete</code>.</p>
+<p><strong><code>Database.h</code> e <code>Database.cpp</code></strong>
+- <strong>Scopo:</strong> Leggere e salvare le statistiche generali dei giocatori a vita (Vittorie, Partite Giocate).
+- <strong>Funzionamento:</strong> All'avvio, scarica il file <code>classifica.csv</code> nella RAM caricando un <code>std::vector&lt;Statistiche&gt; records</code>. A fine partita, aggiorna il vettore e riscrive brutalmente il file sovrascrivendolo, mantenendo la persistenza in formato testo.</p>
+<hr />
+<h3 id="2-la-vista-e-il-controller-grafica-sfml-3">2. LA VISTA E IL CONTROLLER (Grafica SFML 3)</h3>
+<p><strong><code>Scene.h</code> e <code>SceneManager.h/.cpp</code></strong>
+- Il <strong>Motore della Macchina a Stati</strong>. <code>Scene</code> definisce i 3 metodi obbligatori: <code>handleInput()</code>, <code>update()</code>, <code>render()</code>.
+- <code>SceneManager</code> mantiene i font e le texture globali (background) per non caricarli 100 volte appesantendo la RAM. Cambia la schermata distruggendo il vecchio oggetto e creando il nuovo.</p>
+<p><strong>Le Scene Grafiche (Schermate)</strong>
+- <strong><code>LoginScene</code></strong>: Gestisce gli eventi tastiera ASCII per permettere all'utente di digitare il proprio nome.
+- <strong><code>MenuScene</code></strong>: Disegna i pulsanti e reindirizza verso singleplayer, host o join.
+- <strong><code>LobbyScene</code></strong>: Avvia un Server (in attesa) o un Client (che tenta di connettersi). Una volta connessi, avviene il cruciale <em>Handshake</em> del Seme Random.
+- <strong><code>GameScene</code> (Il file più complesso del gioco!)</strong>: 
+  - Calcola la coordinata X/Y di ogni singola carta in mano in modo responsivo (più carte hai, più si sovrappongono per stare nello schermo).
+  - Gestisce l'interfaccia utente (pulsanti "UNO", "PESCA", Pop-up scelta colore).
+  - Interroga <code>GestoreRete</code> in ogni frame per ricevere pacchetti dall'avversario.
+  - Alimenta il motore Audio in base all'azione eseguita.</p>
+<p><strong>Utilità Grafiche e Sonore</strong>
+- <strong><code>UIUtils.h/.cpp</code></strong>: Fabbrica di Bottoni (metodo <code>disegnaPulsante</code>) che include logica di Hover (se il mouse ci passa sopra diventa più chiaro/scuro).
+- <strong><code>SoundManager.h/.cpp</code></strong>: Precarica i buffer audio <code>.wav</code> al volo e istanzia degli <code>sf::Sound</code> (effetti di carte shufflate, vittoria, click di errore).</p>
+<hr />
+<h3 id="3-la-rete-network-multiplayer">3. LA RETE (Network Multiplayer)</h3>
+<p><strong><code>GestoreRete.h</code> e <code>GestoreRete.cpp</code></strong>
+- Implementano le classi <code>ServerRete</code> (Host) e <code>ClientRete</code> (Guest).
+- <strong>IL SEGRETO</strong>: I Socket TCP di base freezano l'applicazione in attesa di dati. Nel nostro progetto chiamiamo <code>socket.setBlocking(false)</code>. Questo costringe SFML a controllare il socket, e se non c'è nulla ritorna un errore specifico (not ready), permettendoci di bypassare l'attesa e disegnare i 60 FPS dello schermo in santa pace. Il multiplayer diventa così totalmente fluido (modello <em>Lockstep</em> o Polling Asincrono).</p>
+<hr />
+<h2 id="deep-dive-come-funziona-lintelligenza-artificiale-ai-bot">DEEP DIVE: COME FUNZIONA L'INTELLIGENZA ARTIFICIALE (AI / BOT)</h2>
+<p>Il nostro bot (Intelligenza Artificiale C++) è governato all'interno della funzione <strong><code>Partita::mossaBot()</code></strong>. Non è un semplice generatore casuale, ma esegue valutazioni basate su regole di priorità (un classico approccio <em>Greedy Algorithm</em>).</p>
+<ol>
+<li><strong>Simulazione Umana ("UNO!"):</strong></li>
+<li>La prima cosa che fa l'AI è accorgersi se ha in mano 2 carte. Se gioca una carta rimarrà con 1 carta sola. Prima ancora di giocarla, il sistema fa emettere al bot un log a schermo in cui dichiara virtualmente "UNO!".</li>
+<li><strong>Ricerca dell'Attacco Perfetto:</strong></li>
+<li>Il bot cicla tutte le carte valide (<code>mossaValida(mano[i])</code>).</li>
+<li>Cerca esplicitamente carte aggressive: <code>PESCA_CINQUE</code>, <code>SALTA_TUTTI</code>, o <code>JOLLY_PESCA_COLORE</code>. Se ne trova una, seleziona immediatamente quella, preferendola a qualsiasi carta normale.</li>
+<li><strong>Mossa Standard o Pesca:</strong></li>
+<li>Se non ha carte aggressive, cicla di nuovo per cercare semplicemente la prima carta valida disponibile.</li>
+<li>Se ha trovato una mossa, la gioca. Nel caso in cui getti un Jolly (che richiede la scelta di un colore), seleziona il colore avvantaggiato usando la formula modulo 4.</li>
+<li>Se non ha mosse valide, chiama <code>bot.pescaCarta(mazzo.pesca())</code> e subisce il turno a vuoto.</li>
+</ol>
+<p>Tutto questo processo avviene in una frazione di millisecondo, dopodiché il controller grafico emette i suoni e aggiorna la schermata.</p>
+<hr />
+<h2 id="il-diario-dei-bug-come-li-abbiamo-trovati-e-distrutti">IL DIARIO DEI BUG: COME LI ABBIAMO TROVATI E DISTRUTTI</h2>
+<h3 id="bug-1-il-paradosso-di-mac-vs-windows-desincronizzazione-di-rete">BUG #1: IL PARADOSSO DI MAC VS WINDOWS (Desincronizzazione di Rete)</h3>
+<ul>
+<li><strong>Come l'abbiamo scoperto:</strong> Facendo giocare in LAN un computer macOS Apple Silicon con un PC Windows, i giocatori si connettevano ma finivano con mani di carte totalmente diverse! La carta in cima agli scarti su Mac era un 3 Rosso, su Windows era un +5 Oscuro. Un incubo.</li>
+<li><strong>Come ci siamo arrivati (L'Indagine):</strong> Ci siamo accorti che, nonostante si passassero un "seme random" iniziale (<code>unsigned seed = ...</code>), le funzioni della libreria standard <code>std::shuffle</code> usano algoritmi sotto il cofano (<code>std::default_random_engine</code>) che sono implementati diversamente dal compilatore <em>Clang</em> di Apple rispetto a <em>MSVC</em> di Microsoft. Pur partendo dallo stesso numero (es. 12345), i due computer mischiavano il mazzo in ordini completamenti alieni l'uno all'altro.</li>
+<li><strong>LA SOLUZIONE:</strong> Abbiamo bandito le funzioni casuali di C++! Abbiamo scritto un nostro generatore matematico interno (il <strong>Generatore Congruenziale Lineare - LCG</strong>) in <code>Mazzo::ottieniNumeroCasuale()</code>.
+  <code>cpp
+  seed_rete = seed_rete * 1664525 + 1013904223;
+  return seed_rete;</code>
+  La matematica pura non cambia mai, indipendentemente dal Sistema Operativo. Ora, Mac e Windows generano byte per byte la stessa identica sequenza, mantenendo il tavolo sincronizzato al 100%.</li>
+</ul>
+<h3 id="bug-2-il-bug-della-pesca-infinita">BUG #2: IL BUG DELLA "PESCA INFINITA"</h3>
+<ul>
+<li><strong>Come l'abbiamo scoperto:</strong> Un giocatore, per testare il sistema o per puro fastidio, iniziava a cliccare violentemente sul mazzo di pesca 50 volte in un secondo. Il gioco continuava a dargli carte, riempiendo la sua mano all'infinito e senza mai passare il turno all'avversario.</li>
+<li><strong>L'Indagine:</strong> All'interno del codice di <code>mossaUmano</code>, quando <code>indiceCarta</code> era <code>-1</code> (che indica il click sul mazzo), il giocatore pescava la carta ma l'algoritmo usciva brutalmente dalla funzione <code>return;</code> senza chiamare <code>passaTurno()</code>.</li>
+<li><strong>LA SOLUZIONE:</strong> Abbiamo modificato le righe 114 in <code>Partita.cpp</code>. Ora, ogni volta che la variabile intercetta una pescata (<code>indiceCarta == -1</code>), prima del <code>return</code> viene <em>obbligatoriamente</em> chiamato il metodo <code>passaTurno()</code>. Il bug è stato risolto e il flusso della partita messo in sicurezza.</li>
+</ul>
+<h3 id="bug-3-il-blocco-del-jolly-grigio-durante-un-flip">BUG #3: IL BLOCCO DEL "JOLLY GRIGIO" DURANTE UN FLIP</h3>
+<ul>
+<li><strong>Come l'abbiamo scoperto:</strong> Durante una partita intensa, un utente giocava una carta <strong>FLIP</strong> per girare il mondo nel Lato Oscuro. Se, in pura casualità, sul fondo del mazzo scarti (che in quel momento era "sotto") c'era stata giocata in precedenza una carta <strong>JOLLY</strong> (di colore base NERO), il gioco crashava o rimaneva freezato in un colore illegale, impedendo a chiunque di scartare carte.</li>
+<li><strong>L'Indagine:</strong> La carta FLIP attiva il comando <code>latoOscuroAttivo = !latoOscuroAttivo</code>, poi guarda la carta in cima agli scarti e ne assume il colore base come "Colore Attivo" del tavolo. Se quella carta si rivela essere un NERO (Jolly), il <code>coloreAttivo</code> diventava <code>NERO</code>. NESSUNA carta giocabile (eccetto un altro jolly) può essere appoggiata sul nero, bloccando permanentemente il tavolo perché ai Jolly non era stato assegnato il pop-up di ricalcolo postumo!</li>
+<li><strong>LA SOLUZIONE:</strong> Abbiamo introdotto l'intelligenza di ripiego nella funzione del Flip (riga 73 di <code>Partita.cpp</code>). Se il Flip rivela un Jolly nero nascosto dietro la pila:
+  <code>cpp
+  if (nuovoColore == NERO) {
+      int r = Mazzo::ottieniNumeroCasuale() % 4;
+      // Forza a caso uno dei 4 colori primari del lato corretto, 
+      // per riavviare la giocabilità.
+  }</code>
+  In questo modo il gioco si sblocca autonomamente assegnando magicamente un colore randomico coerente col lato attuale.</li>
+</ul>
+<hr />
+<p><em>Fine del Documento. Sezione creata interamente in via procedurale a scopo di ripasso.</em></p>
+    </div>
+</body>
+</html>
